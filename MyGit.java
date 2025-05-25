@@ -17,8 +17,14 @@ public class MyGit
             init();
         }
 
-        if (args[0].equals("add"))
+        else if (args[0].equals("add"))
         {
+            Path dotGirt = Paths.get(".girt");
+            Path objects = Paths.get(".girt");
+            if (!Files.exists(dotGirt) || !Files.exists(objects))
+            {
+                
+            }
             ArrayList<String> toAdd = new ArrayList<>();
             int counter = 0;
             for (String a: args)
@@ -39,17 +45,26 @@ public class MyGit
 
     private static void init()
     {
-        Path objects = Paths.get(".git/objects");
+        try
+        {
+            Files.createDirectories(Paths.get(".girt"));
+        }
+        catch(IOException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        
+        Path objects = Paths.get(".girt/objects");
         try
         {
             Files.createDirectories(objects);
         }
         catch (IOException e) 
         {
-            System.out.println(".git failed: " + e.getMessage());
+            System.out.println(".girt failed: " + e.getMessage());
         }
 
-        Path branches = Paths.get(".git/refs/heads");
+        Path branches = Paths.get(".girt/refs/heads");
         try
         {
             Files.createDirectories(branches);
@@ -59,7 +74,7 @@ public class MyGit
             System.out.println("branches failure: " + e.getMessage());
         }
 
-        Path HEAD = Paths.get(".git/HEAD");
+        Path HEAD = Paths.get(".girt/HEAD");
         try
         {
             Files.writeString(HEAD, "ref: refs/heads/main");
@@ -69,7 +84,7 @@ public class MyGit
             System.out.println("HEAD failure:" + e.getMessage());
         }
 
-        Path INDEX = Paths.get(".git/index");
+        Path INDEX = Paths.get(".girt/index");
         try
         {
             Files.createFile(INDEX);
@@ -127,6 +142,8 @@ public class MyGit
                 //get first 2 chars for directory prefix, and rest of string as blob content
                 String directoryName = hashString.substring(0,2);
                 String obj = hashString.substring(2);
+
+                Path fileBlobPath = Paths.get(directoryName + "/" + obj);
             }
             catch(IOException | NoSuchAlgorithmException e)
             {
