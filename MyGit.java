@@ -20,10 +20,10 @@ public class MyGit
         else if (args[0].equals("add"))
         {
             Path dotGirt = Paths.get(".girt");
-            Path objects = Paths.get(".girt");
+            Path objects = Paths.get(".girt/objects");
             if (!Files.exists(dotGirt) || !Files.exists(objects))
             {
-                
+                System.out.println("fatal: not a girt repository (or any of the parent directories): .girt");
             }
             ArrayList<String> toAdd = new ArrayList<>();
             int counter = 0;
@@ -114,7 +114,7 @@ public class MyGit
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 String blobHeader = "blob " + content.length + "\0";
 
-                //append blob header + content bytes to byte stream
+                //append blob header + content bytes to byte stream. Enforce UTF_8 encoding
 
                 out.write(blobHeader.getBytes(StandardCharsets.UTF_8));
                 out.write(content);
@@ -143,7 +143,19 @@ public class MyGit
                 String directoryName = hashString.substring(0,2);
                 String obj = hashString.substring(2);
 
-                Path fileBlobPath = Paths.get(directoryName + "/" + obj);
+                //create intermediate directory
+                Path intermediateDir = Paths.get(".girt/objects/" + directoryName);
+                Files.createDirectories(intermediateDir);
+                
+                Path fileBlobPath = Paths.get(".girt/objects/" + directoryName + "/" + obj);
+
+                if (!Files.exists(fileBlobPath))
+                {
+                    Files.write(fileBlobPath, contentBlob);
+                }
+
+
+                
             }
             catch(IOException | NoSuchAlgorithmException e)
             {
