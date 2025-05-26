@@ -19,12 +19,19 @@ public class MyGit
 
         else if (args[0].equals("add"))
         {
-            Path dotGurt = Paths.get(".gurt");
-            Path objectsPath = Paths.get(".gurt/objects");
-            Path indexPath = Paths.get(".gurt/index");
-            if (!Files.exists(dotGurt) || !Files.exists(objectsPath) || !Files.exists(indexPath))
+            Path dotGurt = findDotGurt();
+            if (dotGurt == null)
             {
                 System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
+                return;
+            }
+
+            Path objectsPath = dotGurt.resolve("objects");
+            Path indexPath = dotGurt.resolve("index");
+            if (!Files.exists(objectsPath) || !Files.exists(indexPath))
+            {
+                System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
+                return;
             }
             ArrayList<String> toAdd = new ArrayList<>();
             int counter = 0;
@@ -43,6 +50,22 @@ public class MyGit
             add(toAdd);
         }
     }
+
+        private static Path findDotGurt()
+        {
+            Path curDir = Paths.get(".").toAbsolutePath();
+            while (curDir!=null)
+            {
+                Path gurt = curDir.resolve(".gurt");
+                if (Files.exists(gurt) && Files.isDirectory(gurt))
+                {
+                    return gurt;
+                }
+                curDir = curDir.getParent();
+            }
+
+            return null;
+        }
 
     private static void init()
     {
@@ -99,6 +122,8 @@ public class MyGit
 
     private static void add(ArrayList<String> toAdd)
     {
+        Path gurtDir = findDotGurt();
+        
         //tracking files to handle duplicate index entries
         HashMap<String,String> filesTrack = new HashMap<>();
         ArrayList<String> uniqueFiles = new ArrayList<>();
@@ -108,6 +133,7 @@ public class MyGit
         {
             try
             {
+
                 //user added same file more than once in same add call; skip
                 if (filesTrack.containsKey(file))
                 {
@@ -156,10 +182,10 @@ public class MyGit
                 String obj = hashString.substring(2);
 
                 //create intermediate directory
-                Path intermediateDir = Paths.get(".gurt/objects/" + directoryName);
+                Path intermediateDir = gurtDir.resolve("objects/" + directoryName);
                 Files.createDirectories(intermediateDir);
                 
-                Path fileBlobPath = Paths.get(".gurt/objects/" + directoryName + "/" + obj);
+                Path fileBlobPath = gurtDir.resolve("objects/" + directoryName + "/" + obj);
 
                 if (!Files.exists(fileBlobPath))
                 {
@@ -182,11 +208,15 @@ public class MyGit
         {
             //getting entries from existing index file
             //if an entry is for a file that wasn't just added, add to files list and put hash in map
-            Path indexPath = Paths.get(".girt/index");
+            Path indexPath = gurtDir.resolve("index");
             List<String> indexEntries = Files.readAllLines(indexPath);
             for (String entry : indexEntries)
             {
                 String[] entryParts = entry.split(" ", 2);
+                if (entryParts.length != 2)
+                {
+                    continue;
+                }
                 String hash = entryParts[0];
                 String fileName = entryParts[1];
                 if (!filesTrack.containsKey(fileName))
@@ -195,6 +225,8 @@ public class MyGit
                     uniqueFiles.add(fileName);
                 }
             }
+
+            Collections.sort(uniqueFiles);
 
             //construct new String to write a new index file
             String newLine = System.lineSeparator();
