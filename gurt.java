@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 
-public class MyGit
+public class gurt
 {
     public static void main(String[] args)
     {
@@ -51,21 +51,47 @@ public class MyGit
         }
     }
 
-        private static Path findDotGurt()
-        {
-            Path curDir = Paths.get(".").toAbsolutePath();
-            while (curDir!=null)
-            {
-                Path gurt = curDir.resolve(".gurt");
-                if (Files.exists(gurt) && Files.isDirectory(gurt))
-                {
-                    return gurt;
-                }
-                curDir = curDir.getParent();
-            }
+    private static void directoryRecurse(Path curDir, List<Path> directories, List<Path> files)
+    {
+        directories.add(curDir);
 
-            return null;
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir)) 
+        {
+            for (Path p : stream)
+            {
+                if (Files.isDirectory(p))
+                {
+                    directoryRecurse(p, directories, files);
+                }
+                else if (Files.isRegularFile(p))
+                {
+                    files.add(p);
+                }
+            }
         }
+        catch (IOException e)
+        {
+            System.out.println("directoryRecurse error: " + e.getMessage());
+        }
+
+
+    }
+
+    private static Path findDotGurt()
+    {
+        Path curDir = Paths.get(".").toAbsolutePath();
+        while (curDir!=null)
+        {
+            Path gurt = curDir.resolve(".gurt");
+            if (Files.exists(gurt) && Files.isDirectory(gurt))
+            {
+                return gurt;
+            }
+            curDir = curDir.getParent();
+        }
+
+        return null;
+    }
 
     private static void init()
     {
