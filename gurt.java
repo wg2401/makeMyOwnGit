@@ -49,6 +49,16 @@ public class gurt
 
             add(toAdd);
         }
+
+        else if (args[0].equals("yo"))
+        {
+            yo();
+        }
+    }
+
+    private static void yo()
+    {
+        System.out.println("gurt: yo");
     }
 
     private static void directoryRecurse(Path curDir, List<Path> directories, List<Path> files)
