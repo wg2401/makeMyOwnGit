@@ -19,11 +19,12 @@ public class MyGit
 
         else if (args[0].equals("add"))
         {
-            Path dotGirt = Paths.get(".girt");
-            Path objects = Paths.get(".girt/objects");
-            if (!Files.exists(dotGirt) || !Files.exists(objects))
+            Path dotGurt = Paths.get(".gurt");
+            Path objectsPath = Paths.get(".gurt/objects");
+            Path indexPath = Paths.get(".gurt/index");
+            if (!Files.exists(dotGurt) || !Files.exists(objectsPath) || !Files.exists(indexPath))
             {
-                System.out.println("fatal: not a girt repository (or any of the parent directories): .girt");
+                System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
             }
             ArrayList<String> toAdd = new ArrayList<>();
             int counter = 0;
@@ -47,24 +48,24 @@ public class MyGit
     {
         try
         {
-            Files.createDirectories(Paths.get(".girt"));
+            Files.createDirectories(Paths.get(".gurt"));
         }
         catch(IOException e)
         {
             System.out.println(e.getMessage());
         }
         
-        Path objects = Paths.get(".girt/objects");
+        Path objects = Paths.get(".gurt/objects");
         try
         {
             Files.createDirectories(objects);
         }
         catch (IOException e) 
         {
-            System.out.println(".girt failed: " + e.getMessage());
+            System.out.println(".gurt failed: " + e.getMessage());
         }
 
-        Path branches = Paths.get(".girt/refs/heads");
+        Path branches = Paths.get(".gurt/refs/heads");
         try
         {
             Files.createDirectories(branches);
@@ -74,7 +75,7 @@ public class MyGit
             System.out.println("branches failure: " + e.getMessage());
         }
 
-        Path HEAD = Paths.get(".girt/HEAD");
+        Path HEAD = Paths.get(".gurt/HEAD");
         try
         {
             Files.writeString(HEAD, "ref: refs/heads/main");
@@ -84,7 +85,7 @@ public class MyGit
             System.out.println("HEAD failure:" + e.getMessage());
         }
 
-        Path INDEX = Paths.get(".girt/index");
+        Path INDEX = Paths.get(".gurt/index");
         try
         {
             Files.createFile(INDEX);
@@ -98,10 +99,21 @@ public class MyGit
 
     private static void add(ArrayList<String> toAdd)
     {
+        //tracking files to handle duplicate index entries
+        HashMap<String,String> filesTrack = new HashMap<>();
+        ArrayList<String> uniqueFiles = new ArrayList<>();
+
+        //writing blobs to objects
         for (String file : toAdd)
         {
             try
             {
+                //user added same file more than once in same add call; skip
+                if (filesTrack.containsKey(file))
+                {
+                    continue;
+                }
+                
                 byte[] hashed = null;
                 byte[] content = null;
                 byte[] contentBlob = null;
@@ -144,23 +156,61 @@ public class MyGit
                 String obj = hashString.substring(2);
 
                 //create intermediate directory
-                Path intermediateDir = Paths.get(".girt/objects/" + directoryName);
+                Path intermediateDir = Paths.get(".gurt/objects/" + directoryName);
                 Files.createDirectories(intermediateDir);
                 
-                Path fileBlobPath = Paths.get(".girt/objects/" + directoryName + "/" + obj);
+                Path fileBlobPath = Paths.get(".gurt/objects/" + directoryName + "/" + obj);
 
                 if (!Files.exists(fileBlobPath))
                 {
                     Files.write(fileBlobPath, contentBlob);
                 }
 
-
+                //add file data to trackers
+                uniqueFiles.add(file);
+                filesTrack.put(file, hashString);
                 
             }
             catch(IOException | NoSuchAlgorithmException e)
             {
-                System.out.println("add error: " + e.getMessage());
+                System.out.println("adding files error: " + e.getMessage());
             }
+        }
+
+        //writing new index file
+        try
+        {
+            //getting entries from existing index file
+            //if an entry is for a file that wasn't just added, add to files list and put hash in map
+            Path indexPath = Paths.get(".girt/index");
+            List<String> indexEntries = Files.readAllLines(indexPath);
+            for (String entry : indexEntries)
+            {
+                String[] entryParts = entry.split(" ", 2);
+                String hash = entryParts[0];
+                String fileName = entryParts[1];
+                if (!filesTrack.containsKey(fileName))
+                {
+                    filesTrack.put(fileName, hash);
+                    uniqueFiles.add(fileName);
+                }
+            }
+
+            //construct new String to write a new index file
+            String newLine = System.lineSeparator();
+            StringBuilder toWrite = new StringBuilder();
+
+            for (String file : uniqueFiles)
+            {
+                toWrite.append(filesTrack.get(file) + " " + file + newLine);
+            }
+
+            Files.writeString(indexPath, toWrite.toString());
+            
+        }
+        catch(IOException e)
+        {
+            System.out.println("index write error: " + e.getMessage());
         }
     }
 }
