@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+//todo: relativize paths, handle file deletion/nonexistent files, and handle directory inputs
+
 public class Add 
 {
     public static void add(ArrayList<String> toAdd)

@@ -55,6 +55,11 @@ public class Gurt
         {
             yo();
         }
+
+        else
+        {
+            System.out.println("command not found");
+        }
     }
 
     private static void yo()
