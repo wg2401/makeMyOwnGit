@@ -1,4 +1,4 @@
-package gurt;
+package gurt.commands;
 
 import java.io.IOException;
 import java.nio.file.Files;
