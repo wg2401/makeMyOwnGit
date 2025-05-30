@@ -2,7 +2,7 @@ package gurt.helperFunctions;
 
 public class ByteHandler 
 {
-    public static byte[] hexToBytes(String hexString)
+    public static byte[] hexStringToBytes(String hexString)
     {
         if (hexString.length() % 2 != 0) 
         {
@@ -19,5 +19,22 @@ public class ByteHandler
         }
 
         return rawBytes;
+    }
+
+    public static byte[] combineTwoByteArrays(byte[] a, byte [] b)
+    {
+        byte[] c = new byte[a.length + b.length];
+
+        for (int i = 0; i < a.length; i++)
+        {
+            c[i] = a[i];
+        }
+
+        for (int i = 0; i < b.length; i++)
+        {
+            c[i + a.length] = b[i];
+        }
+
+        return c;
     }
 }
