@@ -1,20 +1,21 @@
+package gurt;
+
 import java.util.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.security.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 
-public class gurt
+public class Gurt
 {
     public static void main(String[] args)
     {
         if (args[0].equals("init"))
         {
-            init();
+            Init.init();
         }
 
         else if (args[0].equals("add"))
@@ -103,58 +104,6 @@ public class gurt
         return null;
     }
 
-    private static void init()
-    {
-        try
-        {
-            Files.createDirectories(Paths.get(".gurt"));
-        }
-        catch(IOException e)
-        {
-            System.out.println(e.getMessage());
-        }
-        
-        Path objects = Paths.get(".gurt/objects");
-        try
-        {
-            Files.createDirectories(objects);
-        }
-        catch (IOException e) 
-        {
-            System.out.println(".gurt failed: " + e.getMessage());
-        }
-
-        Path branches = Paths.get(".gurt/refs/heads");
-        try
-        {
-            Files.createDirectories(branches);
-        }
-        catch (IOException e)
-        {
-            System.out.println("branches failure: " + e.getMessage());
-        }
-
-        Path HEAD = Paths.get(".gurt/HEAD");
-        try
-        {
-            Files.writeString(HEAD, "ref: refs/heads/main");
-        }
-        catch (IOException e)
-        {
-            System.out.println("HEAD failure:" + e.getMessage());
-        }
-
-        Path INDEX = Paths.get(".gurt/index");
-        try
-        {
-            Files.createFile(INDEX);
-        }
-        catch (IOException e)
-        {
-            System.out.println("INDEX failure:" + e.getMessage());
-        }
-
-    }
 
     private static void add(ArrayList<String> toAdd)
     {
