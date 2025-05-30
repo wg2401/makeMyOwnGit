@@ -1,0 +1,19 @@
+plugins {
+    id 'application'
+    id 'java'
+}
+
+group = 'com.wgu'
+version = '1.0'
+
+application {
+    mainClass = 'gurt.Gurt'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+}
