@@ -46,20 +46,41 @@ public class Commit
                 contentStream.write(ByteHandler.hexStringToBytes(hash));                                
             }
 
+            //construct header
             int treeContentLength = contentStream.toByteArray().length;
-
             String header = "tree " + treeContentLength;
             ByteArrayOutputStream headerByteArrayOutputStream = new ByteArrayOutputStream();
             headerByteArrayOutputStream.write(header.getBytes(StandardCharsets.UTF_8));
             headerByteArrayOutputStream.write(0);
-
             byte[] headerBytes = headerByteArrayOutputStream.toByteArray();
 
+            //construct tree obj byte (to be written)
             byte[] treeBytes = ByteHandler.combineTwoByteArrays(headerBytes, contentStream.toByteArray());
-            
+
+            //get hash
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] treeHashBytes = md.digest(treeBytes);
+            StringBuilder treeHashString = new StringBuilder();
+            for (byte b : treeHashBytes)
+            {
+                treeHashString.append(String.format("%02x", b));
+            }
+
+            //write tree to obj directory
+            String treeIntermediateName = treeHashString.toString().substring(0,2);
+            String treeDirectoryName = treeHashString.toString().substring(2);
+
+            Path interTreeDir = objectsPath.resolve(treeIntermediateName);
+            Path treePath = interTreeDir.resolve(treeDirectoryName);
+            Files.createDirectories(interTreeDir);
+
+            if (!Files.exists(treePath))
+            {
+                Files.write(treePath, treeBytes);
+            }
 
         }
-        catch (IOException e)
+        catch (IOException | NoSuchAlgorithmException e)
         {
             System.out.println(e.getMessage());
         }
