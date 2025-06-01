@@ -79,6 +79,9 @@ public class Commit
                 Files.write(treePath, treeBytes);
             }
 
+            //create and write commit object
+
+
         }
         catch (IOException | NoSuchAlgorithmException e)
         {
