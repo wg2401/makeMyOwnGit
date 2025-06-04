@@ -60,7 +60,7 @@ public class Add
                 //transfer byte stream to contentBlob array
                 contentBlob = out.toByteArray();
 
-                //convert contentBlob bytes to SHA-1
+                //convert contentBlob bytes to hashed str
                 StringBuilder hashedStringBuilder = ByteHandler.bytesToHashedSB(contentBlob);
 
                 String hashString = hashedStringBuilder.toString();
