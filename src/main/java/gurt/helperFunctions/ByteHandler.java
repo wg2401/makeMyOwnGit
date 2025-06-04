@@ -1,5 +1,8 @@
 package gurt.helperFunctions;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class ByteHandler 
 {
     public static byte[] hexStringToBytes(String hexString)
@@ -36,5 +39,41 @@ public class ByteHandler
         }
 
         return c;
+    }
+
+    public static byte[] bytesToHashedBytes(byte[] a)
+    {
+        try
+        {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            return md.digest(a);
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public static StringBuilder bytesToHashedSB(byte[] a)
+    {
+        try
+        {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] hashed = md.digest(a);
+            
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashed)
+            {
+                sb.append(String.format("%02x", b));
+            }
+
+            return sb;
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 }

@@ -24,6 +24,7 @@ public class Commit
             //getting dir paths
             Path objectsPath = dotGurtPath.resolve("objects");
             Path indexPath = dotGurtPath.resolve("index");
+            Path headPath = dotGurtPath.resolve("HEAD");
 
             //reading in index entries into byte buffer
             List<String> indexEntries = Files.readAllLines(indexPath);
@@ -80,7 +81,40 @@ public class Commit
             }
 
             //create and write commit object
+            StringBuilder commitContent = new StringBuilder();
+            commitContent.append("tree ");
+            commitContent.append(treeHashString.toString());            
+            commitContent.append("\n");
 
+            //get previous commit hash (if exists)
+            String headText = Files.readString(headPath);
+            String refsString = new String();
+            if (headText.startsWith("ref:")) 
+            {
+                refsString = headText.substring("ref:".length()).trim();
+            }
+
+            Path refsPath = dotGurtPath.resolve(refsString);
+            if (Files.exists(refsPath));
+            {
+                String prevCom = Files.readString(refsPath);
+                commitContent.append(prevCom);
+                commitContent.append("\n");
+            }
+
+            commitContent.append("\n");
+            commitContent.append("placeholder msg for now");
+
+            byte[] commitObjContent = commitContent.toString().getBytes(StandardCharsets.UTF_8);
+            String commitObjHeader = "commit " + commitObjContent + "\0";
+            ByteArrayOutputStream commitByteOutput = new ByteArrayOutputStream();
+            commitByteOutput.write(commitObjHeader.getBytes(StandardCharsets.UTF_8));
+            commitByteOutput.write(commitObjContent);
+
+            byte[] fullCommitArray = commitByteOutput.toByteArray();
+
+            md = MessageDigest.getInstance("SHA-1");
+            byte[] hashedCommit = md.digest(fullCommitArray);
 
         }
         catch (IOException | NoSuchAlgorithmException e)
