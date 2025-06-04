@@ -55,7 +55,7 @@ public class Commit
             headerByteArrayOutputStream.write(0);
             byte[] headerBytes = headerByteArrayOutputStream.toByteArray();
 
-            //construct tree obj byte (to be written)
+            //construct tree obj byte
             byte[] treeBytes = ByteHandler.combineTwoByteArrays(headerBytes, contentStream.toByteArray());
 
             //get hash
@@ -122,6 +122,9 @@ public class Commit
             {
                 Files.write(commitFileNamePath, fullCommitArray);
             }
+
+            
+            //
 
         }
         catch (IOException e)
