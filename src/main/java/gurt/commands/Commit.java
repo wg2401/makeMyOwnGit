@@ -91,9 +91,9 @@ public class Commit
             Path refsPath = dotGurtPath.resolve(refsString);
             if (Files.exists(refsPath))
             {
-                commitContent.append("parent");
+                commitContent.append("parent ");
                 
-                String prevCom = Files.readString(refsPath);
+                String prevCom = Files.readString(refsPath).trim();
                 commitContent.append(prevCom);
                 commitContent.append("\n");
             }
@@ -110,7 +110,18 @@ public class Commit
             byte[] fullCommitArray = commitByteOutput.toByteArray();
 
             String commitHashString = ByteHandler.bytesToHashedSB(fullCommitArray).toString();
-            
+            String commitSubDirName = commitHashString.substring(0,2);
+            String commitFileName = commitHashString.substring(2);
+
+            Path commitSubDirPath = objectsPath.resolve(commitSubDirName);
+            Path commitFileNamePath = commitSubDirPath.resolve(commitFileName);
+
+            Files.createDirectories(commitSubDirPath);
+
+            if (!Files.exists(commitFileNamePath))
+            {
+                Files.write(commitFileNamePath, fullCommitArray);
+            }
 
         }
         catch (IOException e)
