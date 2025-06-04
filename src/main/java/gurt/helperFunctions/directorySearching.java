@@ -25,6 +25,22 @@ public class directorySearching
         return null;
     }
 
+    public static Path findProjectRoot()
+    {
+        Path curDir = Paths.get(".").toAbsolutePath();
+        while (curDir!=null)
+        {
+            Path gurt = curDir.resolve(".gurt");
+            if (Files.exists(gurt) && Files.isDirectory(gurt))
+            {
+                return curDir;
+            }
+            curDir = curDir.getParent();
+        }
+
+        return null;
+    }
+
     public static void directoryRecurse(Path curDir, List<Path> directories, List<Path> files)
     {
         directories.add(curDir);
