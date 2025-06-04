@@ -54,7 +54,8 @@ public class ByteHandler
             return null;
         }
     }
-
+    
+    //get hashed bytes into hex format, and append to StringBuilder()
     public static StringBuilder bytesToHashedSB(byte[] a)
     {
         try

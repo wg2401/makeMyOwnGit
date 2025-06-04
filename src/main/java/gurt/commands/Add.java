@@ -61,17 +61,7 @@ public class Add
                 contentBlob = out.toByteArray();
 
                 //convert contentBlob bytes to SHA-1
-
-                MessageDigest md = MessageDigest.getInstance("SHA-1");
-                hashed = md.digest(contentBlob);
-
-
-                //get hashed bytes into hex format, and append to string
-                StringBuilder hashedStringBuilder = new StringBuilder();
-                for (byte b: hashed)
-                {
-                    hashedStringBuilder.append(String.format("%02x", b));
-                }
+                StringBuilder hashedStringBuilder = ByteHandler.bytesToHashedSB(contentBlob);
 
                 String hashString = hashedStringBuilder.toString();
 
@@ -96,7 +86,7 @@ public class Add
                 filesTrack.put(file, hashString);
                 
             }
-            catch(IOException | NoSuchAlgorithmException e)
+            catch(IOException e)
             {
                 System.out.println("adding files error: " + e.getMessage());
             }
