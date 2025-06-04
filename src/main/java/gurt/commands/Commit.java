@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -109,6 +110,7 @@ public class Commit
 
             byte[] fullCommitArray = commitByteOutput.toByteArray();
 
+            //convert commit bytes into hash
             String commitHashString = ByteHandler.bytesToHashedSB(fullCommitArray).toString();
             String commitSubDirName = commitHashString.substring(0,2);
             String commitFileName = commitHashString.substring(2);
@@ -124,7 +126,9 @@ public class Commit
             }
 
             
-            //
+            //update refs path
+            Files.writeString(refsPath, commitHashString, StandardCharsets.UTF_8, 
+            StandardOpenOption.CREATE,  StandardOpenOption.TRUNCATE_EXISTING);
 
         }
         catch (IOException e)
