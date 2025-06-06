@@ -69,7 +69,7 @@ public class WriteTree
 
             //append files in root directory to tree stream
             ArrayList<String> curFiles = filesInDirectories.get(projRootPath);
-            
+
             //guard against empty directory edge case:
             if (curFiles == null)
             {
@@ -92,11 +92,11 @@ public class WriteTree
             {
                 for (Path path : stream)
                 {
-                    if (Files.isDirectory(path))
+                    if (Files.isDirectory(path) && filesInDirectories.containsKey(projRootPath.relativize(path)))
                     {
                         byte[] subtreeHash = writeSubTrees(path, filesInDirectories, fileNameToHash, projRootPath);
 
-                        treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
+                        treeContentStream.write("40000 ".getBytes(StandardCharsets.UTF_8));
                         Path relPath = projRootPath.relativize(path);
                         treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
                         treeContentStream.write(0);
