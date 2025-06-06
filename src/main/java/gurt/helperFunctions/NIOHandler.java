@@ -65,14 +65,14 @@ public class NIOHandler
         }
     }
 
-    public static void writeObject(String hash, byte[] object, Path dotGurt)
+    public static void writeObject(String hash, byte[] object, Path objectsPath)
     {
         try
         {
             String intermediateDirStr = hash.substring(0,2);
             String objFileNameStr = hash.substring(2);
             
-            Path intermediateDir = dotGurt.resolve(intermediateDirStr);
+            Path intermediateDir = objectsPath.resolve(intermediateDirStr);
             Path objFileName = intermediateDir.resolve(objFileNameStr);
 
             Files.createDirectories(intermediateDir);

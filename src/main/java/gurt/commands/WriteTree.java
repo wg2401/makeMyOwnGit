@@ -42,10 +42,14 @@ public class WriteTree
                 String hash = entryParts[0];
                 String filename = entryParts[1];
 
-                //
+                //link files paths to different hashes, and files to their directories
                 byte[] blobHashedBytes = ByteHandler.hexStringToBytes(hash);
                 Path filePath = Paths.get(filename);
                 Path fileHomeDir = filePath.getParent();
+                if (fileHomeDir == null) 
+                {
+                    fileHomeDir = projRootPath;
+                }
 
                 if (filesInDirectories.containsKey(fileHomeDir))
                 {
@@ -63,7 +67,7 @@ public class WriteTree
                 }
             }
 
-            //append files in root directory
+            //append files in root directory to tree stream
             ArrayList<String> curFiles = filesInDirectories.get(projRootPath);
             
             ByteArrayOutputStream treeContentStream = new ByteArrayOutputStream();
@@ -77,16 +81,18 @@ public class WriteTree
                 treeContentStream.write(fileHash);
             }
 
+            //recurse to write subtrees
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(projRootPath))
             {
                 for (Path path : stream)
                 {
                     if (Files.isDirectory(path))
                     {
-                        byte[] subtreeHash = writeSubTrees(filesInDirectories, fileNameToHash);
+                        byte[] subtreeHash = writeSubTrees(path, filesInDirectories, fileNameToHash, projRootPath);
 
                         treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
-                        treeContentStream.write(path.toString().getBytes(StandardCharsets.UTF_8));
+                        Path relPath = projRootPath.relativize(path);
+                        treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
                         treeContentStream.write(0);
                         treeContentStream.write(subtreeHash);
                     }
@@ -105,27 +111,86 @@ public class WriteTree
             byte[] treeRootObj = ByteHandler.combineTwoByteArrays(treeRootHeader,treeRootContent);
             String treeRootHash = ByteHandler.bytesToHashedSB(treeRootObj).toString();
 
-            String intermediateDir = treeRootHash.substring(0,2);
-            String objFileName = treeRootHash.substring(2);
+            NIOHandler.writeObject(treeRootHash, treeRootObj, projRootPath.resolve(".gurt").resolve("objects"));
             
-
-            return null;
+            
+            return treeRootHash;
         }
         catch (IOException e)
         {
-
-
+            System.out.println("write tree err: " + e);
             return null;
         }        
     }
 
-    public static byte[] writeSubTrees(HashMap<Path, ArrayList<String>> filesInDirectories, HashMap<String, byte[]> fileNameToHash)
+    public static byte[] writeSubTrees(Path curDir, HashMap<Path, ArrayList<String>> filesInDirectories, 
+    HashMap<String, byte[]> fileNameToHash, Path projRootPath)
     {
+        try
+        {
+            ArrayList<String> curFiles = filesInDirectories.get(curDir);
 
+            //write files into tree obj
+            ByteArrayOutputStream treeContentStream = new ByteArrayOutputStream();
+            for (String file : curFiles)
+            {
+                treeContentStream.write("100644 ".getBytes(StandardCharsets.UTF_8));
 
+                //convert file Path to relativized with curDir
+                Path filePath = Paths.get(file);
+                Path relFilePath = curDir.relativize(filePath);
+                String relFileString = relFilePath.toString();
 
+                treeContentStream.write(relFileString.getBytes(StandardCharsets.UTF_8));
+                
+                
+                treeContentStream.write(0);   
 
+                byte[] fileHash = fileNameToHash.get(file);
+                treeContentStream.write(fileHash);
+            }
 
-        return null;
+            //recurse for subtrees, remember to relativize using curDir
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir))
+            {
+                for (Path path : stream)
+                {
+                    if (Files.isDirectory(path))
+                    {
+                        byte[] subtreeHash = writeSubTrees(path, filesInDirectories, fileNameToHash, projRootPath);
+
+                        treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
+                        Path relPath = curDir.relativize(path);
+                        treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
+                        treeContentStream.write(0);
+                        treeContentStream.write(subtreeHash);
+                    }
+                }
+            }
+
+            //getting hash of tree root:
+            byte[] treeRootContent = treeContentStream.toByteArray();
+
+            ByteArrayOutputStream treeHeaderStream = new ByteArrayOutputStream();
+            String header = "tree " + treeRootContent.length;            
+            treeHeaderStream.write(header.getBytes(StandardCharsets.UTF_8));
+            treeHeaderStream.write(0);
+            byte[] treeRootHeader = treeHeaderStream.toByteArray();
+
+            byte[] treeRootObj = ByteHandler.combineTwoByteArrays(treeRootHeader,treeRootContent);
+            String treeRootHash = ByteHandler.bytesToHashedSB(treeRootObj).toString();
+
+            NIOHandler.writeObject(treeRootHash, treeRootObj, projRootPath.resolve(".gurt").resolve("objects"));
+            
+            
+            return ByteHandler.hexStringToBytes(treeRootHash);
+
+        }
+        catch (IOException e)
+        {
+            System.out.println("writeSubTrees err: " + e);
+            return null;
+        }
     }
+    
 }

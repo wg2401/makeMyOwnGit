@@ -63,21 +63,7 @@ public class Add
 
                 String hashString = hashedStringBuilder.toString();
 
-
-                //get first 2 chars for directory prefix, and rest of string as blob content
-                String directoryName = hashString.substring(0,2);
-                String obj = hashString.substring(2);
-
-                //create intermediate directory
-                Path intermediateDir = gurtDir.resolve("objects/" + directoryName);
-                Files.createDirectories(intermediateDir);
-                
-                Path fileBlobPath = gurtDir.resolve("objects/" + directoryName + "/" + obj);
-
-                if (!Files.exists(fileBlobPath))
-                {
-                    Files.write(fileBlobPath, contentBlob);
-                }
+                NIOHandler.writeObject(hashString, contentBlob, gurtDir.resolve("objects"));
 
                 //add file data to trackers
                 uniqueFiles.add(file);
