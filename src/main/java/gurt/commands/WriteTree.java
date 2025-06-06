@@ -21,7 +21,7 @@ public class WriteTree
         try
         {  
             //get root dir of project
-            Path projRootPath = directorySearching.findProjectRoot();
+            Path projRootPath = NIOHandler.findProjectRoot();
             
             //maps each directory to a list of filenames (strings) under that directory (for recursive subtree construction)
             HashMap<Path, ArrayList<String>> filesInDirectories = new HashMap<>();
@@ -84,12 +84,30 @@ public class WriteTree
                     if (Files.isDirectory(path))
                     {
                         byte[] subtreeHash = writeSubTrees(filesInDirectories, fileNameToHash);
-                        treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
 
-                        
+                        treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
+                        treeContentStream.write(path.toString().getBytes(StandardCharsets.UTF_8));
+                        treeContentStream.write(0);
+                        treeContentStream.write(subtreeHash);
                     }
                 }
             }
+
+            //getting hash of tree root:
+            byte[] treeRootContent = treeContentStream.toByteArray();
+
+            ByteArrayOutputStream treeHeaderStream = new ByteArrayOutputStream();
+            String header = "tree " + treeRootContent.length;            
+            treeHeaderStream.write(header.getBytes(StandardCharsets.UTF_8));
+            treeHeaderStream.write(0);
+            byte[] treeRootHeader = treeHeaderStream.toByteArray();
+
+            byte[] treeRootObj = ByteHandler.combineTwoByteArrays(treeRootHeader,treeRootContent);
+            String treeRootHash = ByteHandler.bytesToHashedSB(treeRootObj).toString();
+
+            String intermediateDir = treeRootHash.substring(0,2);
+            String objFileName = treeRootHash.substring(2);
+            
 
             return null;
         }

@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class directorySearching 
+public class NIOHandler 
 {
     public static Path findDotGurt()
     {
@@ -63,7 +63,28 @@ public class directorySearching
         {
             System.out.println("directoryRecurse error: " + e.getMessage());
         }
+    }
 
+    public static void writeObject(String hash, byte[] object, Path dotGurt)
+    {
+        try
+        {
+            String intermediateDirStr = hash.substring(0,2);
+            String objFileNameStr = hash.substring(2);
+            
+            Path intermediateDir = dotGurt.resolve(intermediateDirStr);
+            Path objFileName = intermediateDir.resolve(objFileNameStr);
+
+            Files.createDirectories(intermediateDir);
+            if (!Files.exists(objFileName))
+            {
+                Files.write(objFileName, object);
+            }
+        }
+        catch(IOException e)
+        {
+            System.out.println(e);
+        }
 
     }
 }

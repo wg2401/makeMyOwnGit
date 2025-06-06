@@ -20,7 +20,7 @@ public class Gurt
 
         else if (args[0].equals("add"))
         {
-            Path dotGurt = directorySearching.findDotGurt();
+            Path dotGurt = NIOHandler.findDotGurt();
             if (dotGurt == null)
             {
                 System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");

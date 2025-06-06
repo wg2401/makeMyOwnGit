@@ -19,7 +19,7 @@ public class Add
 {
     public static void add(ArrayList<String> toAdd)
     {
-        Path gurtDir = directorySearching.findDotGurt();
+        Path gurtDir = NIOHandler.findDotGurt();
         
         //tracking files to handle duplicate index entries
         HashMap<String,String> filesTrack = new HashMap<>();
