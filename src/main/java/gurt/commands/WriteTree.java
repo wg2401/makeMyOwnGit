@@ -70,6 +70,12 @@ public class WriteTree
             //append files in root directory to tree stream
             ArrayList<String> curFiles = filesInDirectories.get(projRootPath);
             
+            //guard against empty directory edge case:
+            if (curFiles == null)
+            {
+                curFiles = new ArrayList<>();
+            }
+
             ByteArrayOutputStream treeContentStream = new ByteArrayOutputStream();
             for (String file : curFiles)
             {
@@ -129,6 +135,12 @@ public class WriteTree
         try
         {
             ArrayList<String> curFiles = filesInDirectories.get(curDir);
+
+            //guard against empty directory edge case:
+            if (curFiles == null)
+            {
+                curFiles = new ArrayList<>();
+            }
 
             //write files into tree obj
             ByteArrayOutputStream treeContentStream = new ByteArrayOutputStream();
