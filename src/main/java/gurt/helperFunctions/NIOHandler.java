@@ -5,7 +5,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class NIOHandler 
 {
@@ -41,21 +43,38 @@ public class NIOHandler
         return null;
     }
 
-    public static void directoryRecurse(Path curDir, List<Path> directories, List<Path> files)
+    //helper method used for add(), adds all seen files and directories to lists for tracking
+    //checks to see whether directory already has been added to prevent unnecessary recursive calls
+    public static void directoryRecurse(Path curDir, List<Path> directories, List<Path> files, Set<Path> seenDirs, Path gurtDir)
     {
-        directories.add(curDir);
+        Path normalizedDir = curDir.toAbsolutePath().normalize();
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir)) 
+        if (normalizedDir.startsWith(gurtDir))
+        {
+            System.err.println("warning: skipping internal metadata: " + normalizedDir);
+            return;
+        }
+
+        if (seenDirs.contains(normalizedDir))
+        {
+            return;
+        }
+
+        seenDirs.add(normalizedDir);
+        
+        directories.add(normalizedDir);
+        
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(normalizedDir)) 
         {
             for (Path p : stream)
             {
                 if (Files.isDirectory(p))
                 {
-                    directoryRecurse(p, directories, files);
+                    directoryRecurse(p, directories, files, seenDirs, gurtDir);
                 }
                 else if (Files.isRegularFile(p))
                 {
-                    files.add(p);
+                    files.add(p.toAbsolutePath().normalize());
                 }
             }
         }

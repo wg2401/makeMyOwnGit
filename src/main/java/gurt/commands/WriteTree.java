@@ -44,7 +44,7 @@ public class WriteTree
 
                 //link files paths to different hashes, and files to their directories
                 byte[] blobHashedBytes = ByteHandler.hexStringToBytes(hash);
-                Path filePath = Paths.get(filename);
+                Path filePath = projRootPath.resolve(filename).normalize();;
                 Path fileHomeDir = filePath.getParent();
                 if (fileHomeDir == null) 
                 {
@@ -92,7 +92,7 @@ public class WriteTree
             {
                 for (Path path : stream)
                 {
-                    if (Files.isDirectory(path) && filesInDirectories.containsKey(projRootPath.relativize(path)))
+                    if (Files.isDirectory(path) && filesInDirectories.containsKey(path))
                     {
                         byte[] subtreeHash = writeSubTrees(path, filesInDirectories, fileNameToHash, projRootPath);
 
@@ -149,7 +149,7 @@ public class WriteTree
                 treeContentStream.write("100644 ".getBytes(StandardCharsets.UTF_8));
 
                 //convert file Path to relativized with curDir
-                Path filePath = Paths.get(file);
+                Path filePath = projRootPath.resolve(file).normalize();
                 Path relFilePath = curDir.relativize(filePath);
                 String relFileString = relFilePath.toString();
 
@@ -171,7 +171,7 @@ public class WriteTree
                     {
                         byte[] subtreeHash = writeSubTrees(path, filesInDirectories, fileNameToHash, projRootPath);
 
-                        treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
+                        treeContentStream.write("40000 ".getBytes(StandardCharsets.UTF_8));
                         Path relPath = curDir.relativize(path);
                         treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
                         treeContentStream.write(0);

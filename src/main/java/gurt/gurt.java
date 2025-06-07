@@ -13,6 +13,8 @@ public class Gurt
 {
     public static void main(String[] args)
     {
+        Path projRootDir = NIOHandler.findProjectRoot();
+
         if (args[0].equals("init"))
         {
             Init.init();
@@ -20,7 +22,7 @@ public class Gurt
 
         else if (args[0].equals("add"))
         {
-            Path dotGurt = NIOHandler.findDotGurt();
+            Path dotGurt = projRootDir.resolve(".gurt");
             if (dotGurt == null)
             {
                 System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
@@ -48,7 +50,7 @@ public class Gurt
                 }
             }
 
-            Add.add(toAdd);
+            Add.add(toAdd, projRootDir);
         }
 
         else if (args[0].equals("yo"))

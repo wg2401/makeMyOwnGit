@@ -12,38 +12,67 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 //todo: relativize paths, handle file deletion/nonexistent files, and handle directory inputs
 
 public class Add 
 {
-    public static void add(ArrayList<String> toAdd)
+    public static void add(ArrayList<String> toAdd, Path projRootDir)
     {
-        Path gurtDir = NIOHandler.findDotGurt();
+        Path gurtDir = projRootDir.resolve(".gurt");
         
         //tracking files to handle duplicate index entries
         HashMap<String,String> filesTrack = new HashMap<>();
         ArrayList<String> uniqueFiles = new ArrayList<>();
 
+        //track duplicate directories to cut down runtime
+        Set<Path> seenDirs = new HashSet<>();
+        seenDirs.add(gurtDir.toAbsolutePath().normalize());
+
         //writing blobs to objects
-        for (String file : toAdd)
+        while (!toAdd.isEmpty())
         {
             try
-            {
+            {   
+                String file = toAdd.get(toAdd.size() - 1);
+                toAdd.remove(toAdd.size() - 1);
+
+                //get normalized absolute path for consistency
+                Path fPath = Paths.get(file);
+                Path absNormPath = fPath.toAbsolutePath().normalize();
+                String absNormPathString = absNormPath.toString();
+
+                //directory handling:
+                if (Files.isDirectory(absNormPath))
+                {
+                    if (!seenDirs.contains(absNormPath))
+                    {
+                        List<Path> filesUnderDir = new ArrayList<>();
+                        List<Path> directoriesUnderDir = new ArrayList<>();
+
+                        NIOHandler.directoryRecurse(absNormPath, directoriesUnderDir, filesUnderDir, seenDirs, gurtDir);
+                        for (Path f : filesUnderDir)
+                        {   
+                            toAdd.add(f.toString());
+                        }
+                    }
+                    continue;
+                }
 
                 //user added same file more than once in same add call; skip
-                if (filesTrack.containsKey(file))
+                if (filesTrack.containsKey(absNormPathString))
                 {
                     continue;
                 }
                 
-                byte[] hashed = null;
                 byte[] content = null;
                 byte[] contentBlob = null;
 
                 //get content bytes
                 
-                content = Files.readAllBytes(Paths.get(file));
+                content = Files.readAllBytes(Paths.get(absNormPathString));
                 
 
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -66,8 +95,8 @@ public class Add
                 NIOHandler.writeObject(hashString, contentBlob, gurtDir.resolve("objects"));
 
                 //add file data to trackers
-                uniqueFiles.add(file);
-                filesTrack.put(file, hashString);
+                uniqueFiles.add(absNormPathString);
+                filesTrack.put(absNormPathString, hashString);
                 
             }
             catch(IOException e)
@@ -92,10 +121,13 @@ public class Add
                 }
                 String hash = entryParts[0];
                 String fileName = entryParts[1];
-                if (!filesTrack.containsKey(fileName))
+
+                String absNormPathString = projRootDir.resolve(fileName).toAbsolutePath().normalize().toString();
+                
+                if (!filesTrack.containsKey(absNormPathString))
                 {
-                    filesTrack.put(fileName, hash);
-                    uniqueFiles.add(fileName);
+                    filesTrack.put(absNormPathString, hash);
+                    uniqueFiles.add(absNormPathString);
                 }
             }
 
@@ -107,7 +139,10 @@ public class Add
 
             for (String file : uniqueFiles)
             {
-                toWrite.append(filesTrack.get(file) + " " + file + newLine);
+                Path fPath = Paths.get(file);
+                Path relPath = projRootDir.relativize(fPath);
+
+                toWrite.append(filesTrack.get(file) + " " + relPath.toString() + newLine);
             }
 
             Files.writeString(indexPath, toWrite.toString());
