@@ -25,9 +25,11 @@ public class WriteTree
             Path projRootPath = NIOHandler.findProjectRoot();
             
             //maps each directory to a list of filenames (strings) under that directory (for recursive subtree construction)
+            //maps absolute paths to relative paths
             HashMap<Path, ArrayList<String>> filesInDirectories = new HashMap<>();
 
-            //maps each file to it's byte[] hash
+            //maps each file path to it's byte[] hash
+            //maps relative path (from proj root) to byte[]
             HashMap<String, byte[]> fileNameToHash = new HashMap<>();
 
             //read files from index and add them to maps
@@ -113,6 +115,7 @@ public class WriteTree
                 Path curFP = null;
                 Path curDP = null;
                 
+                //absolute paths
                 if (fileP < fileAbsPaths.size())
                 {
                     curFP = fileAbsPaths.get(fileP);
@@ -195,11 +198,14 @@ public class WriteTree
                 curFiles = new ArrayList<>();
             }
 
-            //put files into list for sorting
+            //put file relative paths into list for sorting
+            ArrayList<Path> fileRelPaths = new ArrayList<>();
             ByteArrayOutputStream treeContentStream = new ByteArrayOutputStream();
             for (String file : curFiles)
             {
-                
+                Path absFile = projRootPath.resolve(file).normalize();
+                Path relPath = curDir.relativize(absFile);
+                fileRelPaths.add(relPath);
                 // treeContentStream.write("100644 ".getBytes(StandardCharsets.UTF_8));
 
                 // //convert file Path to relativized with curDir
@@ -216,21 +222,83 @@ public class WriteTree
                 // treeContentStream.write(fileHash);
             }
 
-            //recurse for subtrees, remember to relativize using curDir
+            Collections.sort(fileRelPaths);
+
+            //put directory relative paths in for sorting
+            ArrayList<Path> dirRelPaths = new ArrayList<>();
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir))
             {
                 for (Path path : stream)
                 {
-                    if (Files.isDirectory(path))
+                    if (Files.isDirectory(path) && filesInDirectories.containsKey(path))
                     {
-                        byte[] subtreeHash = writeSubTrees(path, filesInDirectories, fileNameToHash, projRootPath);
-
-                        treeContentStream.write("40000 ".getBytes(StandardCharsets.UTF_8));
                         Path relPath = curDir.relativize(path);
-                        treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
-                        treeContentStream.write(0);
-                        treeContentStream.write(subtreeHash);
+                        dirRelPaths.add(relPath);
+                        // byte[] subtreeHash = writeSubTrees(path, filesInDirectories, fileNameToHash, projRootPath);
+
+                        // treeContentStream.write("40000 ".getBytes(StandardCharsets.UTF_8));
+                        // Path relPath = curDir.relativize(path);
+                        // treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
+                        // treeContentStream.write(0);
+                        // treeContentStream.write(subtreeHash);
                     }
+                }
+            }
+
+            Collections.sort(dirRelPaths);
+
+            //merge sort
+            int fileP = 0;
+            int dirP = 0;
+
+            while (fileP < fileRelPaths.size() || dirP < dirRelPaths.size())
+            {
+                Path curFP = null;
+                Path curDP = null;
+                
+                //absolute paths
+                if (fileP < fileRelPaths.size())
+                {
+                    curFP = fileRelPaths.get(fileP);
+                }
+
+                if (dirP < dirRelPaths.size())
+                {
+                    curDP = dirRelPaths.get(dirP);
+                }
+                
+                //write file to tree
+                if (curDP == null || curFP.compareTo(curDP) < 0 || dirP >= dirRelPaths.size())
+                {                    
+                    treeContentStream.write("100644 ".getBytes(StandardCharsets.UTF_8));
+                    //write curFP (path relativized with curDir) directly
+                    treeContentStream.write(curFP.toString().getBytes(StandardCharsets.UTF_8));
+                    treeContentStream.write(0);
+
+                    //get path relative to projRootDir to get filehash
+                    Path absFile = curDir.resolve(curFP).normalize();
+                    Path rootRelPath = projRootPath.relativize(absFile);
+                    byte[] fileHash = fileNameToHash.get(rootRelPath.toString());
+                    treeContentStream.write(fileHash);
+
+                    fileP++;
+                }
+                //recursively write dir to tree
+                else
+                {
+                    //get absolute path for recursive call:
+                    Path absDir = curDir.resolve(curDP).normalize();
+
+                    //get hash from recursive call
+                    byte[] subtreeHash = writeSubTrees(absDir, filesInDirectories, fileNameToHash, projRootPath);
+
+                    treeContentStream.write("40000 ".getBytes(StandardCharsets.UTF_8));
+                    //directly write in curDP (relative path)
+                    treeContentStream.write(curDP.toString().getBytes(StandardCharsets.UTF_8));
+                    treeContentStream.write(0);
+                    treeContentStream.write(subtreeHash);
+
+                    dirP++;
                 }
             }
 
