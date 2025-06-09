@@ -42,6 +42,12 @@ public class Add
                 //get normalized absolute path for consistency
                 Path fPath = Paths.get(file);
                 Path absNormPath = fPath.toAbsolutePath().normalize();
+                if (!Files.exists(absNormPath)) 
+                {
+                    System.err.println("warning: file does not exist, skipping: " + absNormPath);
+                    continue;
+                }
+                
                 String absNormPathString = absNormPath.toString();
 
                 //directory handling:

@@ -17,7 +17,15 @@ public class Gurt
 
         if (args[0].equals("init"))
         {
-            Init.init();
+            if (Files.exists(projRootDir.resolve(".gurt")))
+            {
+                System.out.println("error: this is already a gurt repo");
+            }
+            
+            else
+            {
+                Init.init();
+            }
         }
 
         else if (args[0].equals("add"))
@@ -56,6 +64,40 @@ public class Gurt
         else if (args[0].equals("yo"))
         {
             yo();
+        }
+
+        else if (args[0].equals("commit"))
+        {
+            if (args.length < 2) 
+            {
+                System.out.println("invalid args, usage: commit \"<message>\"");
+                return;
+            }
+            
+            //parse commit message
+            StringBuilder commitMess = new StringBuilder();
+            
+            String firstWord = args[1];
+            String lastWord = args[args.length - 1];
+
+            if (firstWord.charAt(0) != '\"' || lastWord.charAt(lastWord.length() - 1) != '\"')
+            {
+                System.out.println("invalid args, usage: commit \"<message>\"");
+                return;
+            }
+
+            for (int i = 1; i < args.length; i++)
+            {
+                commitMess.append(args[i] + " ");
+            }
+
+            String message = commitMess.toString().substring(1, commitMess.length() - 1);
+            
+        }
+
+        else if (args[0].equals("write-tree"))
+        {
+            System.out.println(WriteTree.writeTree(projRootDir.resolve("index")));
         }
 
         else

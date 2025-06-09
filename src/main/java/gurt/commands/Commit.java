@@ -12,7 +12,7 @@ import java.util.List;
 
 public class Commit 
 {
-    public static void commit(Path dotGurtPath)
+    public static void commit(Path dotGurtPath, String message)
     {
         try
         {
