@@ -14,6 +14,7 @@ public class Gurt
     public static void main(String[] args)
     {
         Path projRootDir = NIOHandler.findProjectRoot();
+        Path dotGurtPath = projRootDir.resolve(".gurt");
 
         if (args[0].equals("init"))
         {
@@ -91,8 +92,8 @@ public class Gurt
                 commitMess.append(args[i] + " ");
             }
 
-            String message = commitMess.toString().substring(1, commitMess.length() - 1);
-            
+            String message = commitMess.toString().substring(0, commitMess.length() - 1);
+            Commit.commit(dotGurtPath,message);
         }
 
         else if (args[0].equals("write-tree"))
