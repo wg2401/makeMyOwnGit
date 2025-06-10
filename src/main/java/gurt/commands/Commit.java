@@ -48,7 +48,7 @@ public class Commit
             }
 
             commitContent.append("\n");
-            commitContent.append("placeholder msg for now");
+            commitContent.append(message);
 
             byte[] commitObjContent = commitContent.toString().getBytes(StandardCharsets.UTF_8);
             String commitObjHeader = "commit " + commitObjContent.length + "\0";
