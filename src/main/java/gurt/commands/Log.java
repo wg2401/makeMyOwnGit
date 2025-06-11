@@ -9,7 +9,7 @@ import java.nio.file.Path;
 
 public class Log 
 {
-    public void log(Path projRootDir)
+    public static void log(Path projRootDir)
     {
         try
         {

@@ -14,11 +14,19 @@ public class Gurt
     public static void main(String[] args)
     {
         Path projRootDir = NIOHandler.findProjectRoot();
-        Path dotGurtPath = projRootDir.resolve(".gurt");
+        boolean inGurtRepo;
+        if (projRootDir == null)
+        {
+            inGurtRepo = false;
+        }
+        else
+        {
+            inGurtRepo = true;
+        }
 
         if (args[0].equals("init"))
         {
-            if (Files.exists(projRootDir.resolve(".gurt")))
+            if (inGurtRepo)
             {
                 System.out.println("error: this is already a gurt repo");
             }
@@ -31,12 +39,13 @@ public class Gurt
 
         else if (args[0].equals("add"))
         {
-            Path dotGurt = projRootDir.resolve(".gurt");
-            if (dotGurt == null)
+            if (!inGurtRepo)
             {
                 System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
                 return;
             }
+            
+            Path dotGurt = projRootDir.resolve(".gurt");
 
             Path objectsPath = dotGurt.resolve("objects");
             Path indexPath = dotGurt.resolve("index");
@@ -69,6 +78,12 @@ public class Gurt
 
         else if (args[0].equals("commit"))
         {
+            if (!inGurtRepo)
+            {
+                System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
+                return;
+            }
+            Path dotGurtPath = projRootDir.resolve(".gurt");
             if (args.length < 2) 
             {
                 System.out.println("invalid args, usage: commit \"<message>\"");
@@ -98,7 +113,22 @@ public class Gurt
 
         else if (args[0].equals("write-tree"))
         {
+            if (!inGurtRepo)
+            {
+                System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
+                return;
+            }
             System.out.println(WriteTree.writeTree(projRootDir.resolve("index")));
+        }
+
+        else if (args[0].equals("log"))
+        {
+            if (!inGurtRepo)
+            {
+                System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
+                return;
+            }
+            Log.log(projRootDir);
         }
 
         else
