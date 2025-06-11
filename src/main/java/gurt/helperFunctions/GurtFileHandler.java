@@ -1,9 +1,9 @@
 package gurt.helperFunctions;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 
 public class GurtFileHandler 
@@ -83,6 +83,33 @@ public class GurtFileHandler
         catch(IOException e)
         {
             throw new RuntimeException("Failed to read index during binary search", e);
+        }
+    }
+
+    //fills hashmap with absolute path -> hash pairings for the given commit hash
+    public static void loadCommit(HashMap<Path, String> fileToHash, String hash, Path projRootDir)
+    {
+        try
+        {
+            Path dotGurt = projRootDir.resolve(".gurt");
+            Path objectPath = dotGurt.resolve("objects");
+
+            //get and trim commit object
+            String firstTwo = hash.substring(0,2);
+            String rest = hash.substring(2);
+
+            Path intermediate = objectPath.resolve(firstTwo);
+            Path commitObj = intermediate.resolve(rest);
+
+            byte[] commitContent = Files.readAllBytes(commitObj);
+            commitContent = removeHeader(commitContent);
+
+            //now parse
+            
+        }
+        catch (IOException e)
+        {
+            System.out.println(e);
         }
     }
 }

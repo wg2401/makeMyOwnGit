@@ -12,9 +12,29 @@ import java.util.ArrayList;
 
 public class Status
 {
-    public static void status()
+    public static void status(Path projRootDir)
     {
-        return;
+       try
+       {
+            Path dotGurtPath = projRootDir.resolve(".gurt");
+            Path headPath = dotGurtPath.resolve("HEAD");
+
+            //get cur branch name
+            String headText = Files.readString(headPath);
+            String[] headParts = headText.split(" ");
+            String branchPathString = headParts[0];
+            Path branchAbsolutePath = projRootDir.resolve(branchPathString);
+            String branchName = branchAbsolutePath.getFileName().toString();
+
+            System.out.println("On branch " + branchName + ":");
+            System.out.println();
+
+            
+       }
+       catch (IOException e)
+       {
+            System.out.println(e);
+       }
     }
 
     //recurses thru all dirs and adds path names from index to respective lists
