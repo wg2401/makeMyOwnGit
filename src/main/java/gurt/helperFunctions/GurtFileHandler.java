@@ -1,6 +1,7 @@
 package gurt.helperFunctions;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -105,7 +106,11 @@ public class GurtFileHandler
             commitContent = removeHeader(commitContent);
 
             //now parse
-            
+            String commitText = new String(commitContent, StandardCharsets.UTF_8);
+            String[] fields = commitText.split("\n");
+            String treeRootHash = fields[0];
+            treeRootHash = treeRootHash.substring(5);
+
         }
         catch (IOException e)
         {
