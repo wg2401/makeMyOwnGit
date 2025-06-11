@@ -2,13 +2,10 @@ package gurt.commands;
 
 import gurt.helperFunctions.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
 
 public class Log 
 {
@@ -16,7 +13,7 @@ public class Log
     {
         try
         {
-            Path dotGurtPath = projRootDir.resolve(projRootDir);
+            Path dotGurtPath = projRootDir.resolve(".gurt");
             Path objectsPath = dotGurtPath.resolve("objects");
             Path headPath = dotGurtPath.resolve("HEAD");
             
@@ -40,13 +37,53 @@ public class Log
             String firstTwo = latestCommitHash.substring(0,2);
             String rest = latestCommitHash.substring(2);
 
-            Path intermediateDir = objectsPath.resolve("firstTwo");
+            Path intermediateDir = objectsPath.resolve(firstTwo);
             Path commitFile = intermediateDir.resolve(rest);
 
+            //read in commit object and parse
             byte[] commitContent = Files.readAllBytes(commitFile);
-            
             byte[] withoutHeader = ObjectParser.removeHeader(commitContent);
+            String commitText = new String(withoutHeader, StandardCharsets.UTF_8);
 
+            //try to get parent commit hash
+            String[] fields = commitText.split("\n");
+            int curLine = 0;
+            String parentHash = null;
+            boolean hasParent = false;
+
+            for (; curLine < fields.length; curLine++)
+            {
+                if (fields[curLine].equals(""))
+                {
+                    break;
+                }
+
+                if (fields[curLine].startsWith("parent "))
+                {
+                    hasParent = true;
+                    parentHash = fields[curLine].substring(7);
+                }
+            }
+
+            //get current commit message
+            //skip blank line
+            curLine++;
+            StringBuilder message = new StringBuilder();
+            for (; curLine < fields.length; curLine++)
+            {
+                message.append(fields[curLine]);
+                message.append("\n");
+            }
+
+            //print out current commit data:
+            System.out.println("commit: " + latestCommitHash);
+            System.out.println(message.toString());
+            
+
+            while (hasParent)
+            {
+
+            }
         }
         catch (IOException e)
         {
