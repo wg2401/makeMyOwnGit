@@ -29,7 +29,7 @@ public class NIOHandler
 
     public static Path findProjectRoot()
     {
-        Path curDir = Paths.get(".").toAbsolutePath();
+        Path curDir = Paths.get(".").toAbsolutePath().normalize();
         while (curDir!=null)
         {
             Path gurt = curDir.resolve(".gurt");

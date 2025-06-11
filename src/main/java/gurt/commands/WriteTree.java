@@ -183,7 +183,7 @@ public class WriteTree
         }        
     }
 
-    public static byte[] writeSubTrees(Path curDir, HashMap<Path, ArrayList<String>> filesInDirectories, 
+    private static byte[] writeSubTrees(Path curDir, HashMap<Path, ArrayList<String>> filesInDirectories, 
     HashMap<String, byte[]> fileNameToHash, Path projRootPath)
     {
         try

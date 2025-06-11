@@ -2,6 +2,12 @@ package gurt.helperFunctions;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ByteHandler 
 {
@@ -76,5 +82,26 @@ public class ByteHandler
             System.out.println(e.getMessage());
             return null;
         }
+    }
+
+    //pass in nomalized absolute path (important!) to file and return corresponding SHA-256 blob hash bytes
+    public static String computeBlobHash(Path file)
+    {
+        try
+        {
+            //construct blob array
+            byte[] content = Files.readAllBytes(file);
+            String blobHeader = "blob " + content.length + "\0";
+            byte[] headerBytes = blobHeader.getBytes(StandardCharsets.UTF_8);
+            
+            byte[] blobObject = combineTwoByteArrays(headerBytes, content);
+
+            return bytesToHashedSB(blobObject).toString();
+        }
+        catch(IOException e)
+        {
+            System.out.println(e);
+            return null;
+        }  
     }
 }
