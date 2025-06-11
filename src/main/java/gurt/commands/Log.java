@@ -78,11 +78,52 @@ public class Log
             //print out current commit data:
             System.out.println("commit: " + latestCommitHash);
             System.out.println(message.toString());
-            
+            System.out.println();
 
             while (hasParent)
             {
+                latestCommitHash = parentHash;
+                
+                firstTwo = parentHash.substring(0,2);
+                rest = parentHash.substring(2);
 
+                intermediateDir = objectsPath.resolve(firstTwo);
+                commitFile = intermediateDir.resolve(rest);
+
+                commitContent = Files.readAllBytes(commitFile);
+                withoutHeader = ObjectParser.removeHeader(commitContent);
+                commitText = new String(withoutHeader, StandardCharsets.UTF_8);
+
+                fields = commitText.split("\n");
+                curLine = 0;
+                hasParent = false;
+
+                for (; curLine < fields.length; curLine++)
+                {
+                    if (fields[curLine].equals(""))
+                    {
+                        break;
+                    }
+
+                    if (fields[curLine].startsWith("parent "))
+                    {
+                        hasParent = true;
+                        parentHash = fields[curLine].substring(7);
+                    }
+                }
+
+                curLine++;
+                message = new StringBuilder();
+
+                for (; curLine < fields.length; curLine++)
+                {
+                    message.append(fields[curLine]);
+                    message.append("\n");
+                }
+
+                System.out.println("commit: " + latestCommitHash);
+                System.out.println(message.toString());
+                System.out.println();
             }
         }
         catch (IOException e)
