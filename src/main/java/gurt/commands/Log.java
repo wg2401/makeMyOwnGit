@@ -42,7 +42,7 @@ public class Log
 
             //read in commit object and parse
             byte[] commitContent = Files.readAllBytes(commitFile);
-            byte[] withoutHeader = ObjectParser.removeHeader(commitContent);
+            byte[] withoutHeader = GurtFileHandler.removeHeader(commitContent);
             String commitText = new String(withoutHeader, StandardCharsets.UTF_8);
 
             //try to get parent commit hash
@@ -91,7 +91,7 @@ public class Log
                 commitFile = intermediateDir.resolve(rest);
 
                 commitContent = Files.readAllBytes(commitFile);
-                withoutHeader = ObjectParser.removeHeader(commitContent);
+                withoutHeader = GurtFileHandler.removeHeader(commitContent);
                 commitText = new String(withoutHeader, StandardCharsets.UTF_8);
 
                 fields = commitText.split("\n");
