@@ -149,7 +149,7 @@ public class WriteTree
                     //convert absolute path to rel path
                     Path relPath = projRootPath.relativize(curDP);
 
-                    treeContentStream.write("40000 ".getBytes(StandardCharsets.UTF_8));
+                    treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
                     treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
                     treeContentStream.write(0);
                     treeContentStream.write(subtreeHash);
@@ -204,20 +204,6 @@ public class WriteTree
                 Path absFile = projRootPath.resolve(file).normalize();
                 Path relPath = curDir.relativize(absFile);
                 fileRelPaths.add(relPath);
-                // treeContentStream.write("100644 ".getBytes(StandardCharsets.UTF_8));
-
-                // //convert file Path to relativized with curDir
-                // Path filePath = projRootPath.resolve(file).normalize();
-                // Path relFilePath = curDir.relativize(filePath);
-                // String relFileString = relFilePath.toString();
-
-                // treeContentStream.write(relFileString.getBytes(StandardCharsets.UTF_8));
-                
-                
-                // treeContentStream.write(0);   
-
-                // byte[] fileHash = fileNameToHash.get(file);
-                // treeContentStream.write(fileHash);
             }
 
             Collections.sort(fileRelPaths);
@@ -232,13 +218,6 @@ public class WriteTree
                     {
                         Path relPath = curDir.relativize(path);
                         dirRelPaths.add(relPath);
-                        // byte[] subtreeHash = writeSubTrees(path, filesInDirectories, fileNameToHash, projRootPath);
-
-                        // treeContentStream.write("40000 ".getBytes(StandardCharsets.UTF_8));
-                        // Path relPath = curDir.relativize(path);
-                        // treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
-                        // treeContentStream.write(0);
-                        // treeContentStream.write(subtreeHash);
                     }
                 }
             }
@@ -290,7 +269,7 @@ public class WriteTree
                     //get hash from recursive call
                     byte[] subtreeHash = writeSubTrees(absDir, filesInDirectories, fileNameToHash, projRootPath);
 
-                    treeContentStream.write("40000 ".getBytes(StandardCharsets.UTF_8));
+                    treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
                     //directly write in curDP (relative path)
                     treeContentStream.write(curDP.toString().getBytes(StandardCharsets.UTF_8));
                     treeContentStream.write(0);

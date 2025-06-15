@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Arrays;
 
 public class GurtFileHandler 
 {
@@ -111,8 +112,75 @@ public class GurtFileHandler
             String treeRootHash = fields[0];
             treeRootHash = treeRootHash.substring(5);
 
+            subTreeRecurse(projRootDir, treeRootHash, projRootDir, fileToHash);
         }
         catch (IOException e)
+        {
+            System.out.println(e);
+        }
+    }
+
+    //recursively add files to map from subtree objects
+    //takes in projRootDir (absolute path) and maps file abs path -> hash
+    public static void subTreeRecurse(Path curDir, String treeHash, Path projRootDir, HashMap<Path, String> fileToHash)
+    {
+        try
+        {
+            Path dotGurt = projRootDir.resolve(".gurt");
+            Path objectPath = dotGurt.resolve("objects");
+
+            //read in and clean tree object:
+            String firstTwo = treeHash.substring(0,2);
+            String rest = treeHash.substring(2);
+            Path intermediate = objectPath.resolve(firstTwo);
+            Path treeObjPath = intermediate.resolve(rest);
+
+            byte[] treeObj = Files.readAllBytes(treeObjPath);
+            byte[] treeContent = removeHeader(treeObj);
+
+            //parse tree object and add to map/recurse
+            int pointer = 0;
+            while (pointer < treeContent.length)
+            {
+                int start = pointer;
+                
+                //find null pointer
+                while (treeContent[pointer] != 0)
+                {
+                    pointer++;
+                }
+
+                //get entry mode and pathname
+                String entryFields = new String(Arrays.copyOfRange(treeContent, start, pointer));
+
+                //parse entryfields
+                String[] parts = entryFields.split(" ", 2);
+                String mode = parts[0];
+                String path = parts[1];
+                Path absPath = curDir.resolve(path);
+
+                //skip null pter
+                pointer++;
+
+                //get SHA 256 hash (32 bytes)
+                byte[] hashBytes = Arrays.copyOfRange(treeContent, pointer, pointer + 32);
+                String hashString = ByteHandler.hashToString(hashBytes).toString();
+
+                pointer += 32;
+
+                if (mode.equals("100644"))
+                {
+                    fileToHash.put(absPath, hashString);
+                }
+                
+                else if (mode.equals("040000"))
+                {
+                    subTreeRecurse(absPath, hashString, projRootDir, fileToHash);
+                }
+            }
+            
+        }
+        catch(IOException e)
         {
             System.out.println(e);
         }

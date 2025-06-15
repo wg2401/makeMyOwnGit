@@ -61,7 +61,7 @@ public class ByteHandler
         }
     }
     
-    //get hashed bytes into hex format, and append to StringBuilder()
+    //given content bytes, hash them then convert hash to SB
     public static StringBuilder bytesToHashedSB(byte[] a)
     {
         try
@@ -84,6 +84,18 @@ public class ByteHandler
         }
     }
 
+    //given SHA 256 hash bytes, convert to string
+    public static StringBuilder hashToString(byte[] hash)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hash)
+        {
+            sb.append(String.format("%02x", b));
+        }
+
+        return sb;
+    }
+
     //pass in nomalized absolute path (important!) to file and return corresponding SHA-256 blob hash bytes
     public static String computeBlobHash(Path file)
     {
@@ -104,4 +116,6 @@ public class ByteHandler
             return null;
         }  
     }
+
+
 }
