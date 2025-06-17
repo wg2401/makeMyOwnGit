@@ -83,33 +83,26 @@ public class Gurt
                 System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
                 return;
             }
+
             Path dotGurtPath = projRootDir.resolve(".gurt");
+
             if (args.length < 2) 
             {
-                System.out.println("invalid args, usage: commit \"<message>\"");
+                System.out.println("invalid args, usage: commit <message>");
                 return;
             }
-            
-            //parse commit message
+
+            // Join all args after "commit" into a message
             StringBuilder commitMess = new StringBuilder();
-            
-            String firstWord = args[1];
-            String lastWord = args[args.length - 1];
-
-            if (firstWord.charAt(0) != '\"' || lastWord.charAt(lastWord.length() - 1) != '\"')
-            {
-                System.out.println("invalid args, usage: commit \"<message>\"");
-                return;
-            }
-
             for (int i = 1; i < args.length; i++)
             {
-                commitMess.append(args[i] + " ");
+                commitMess.append(args[i]).append(" ");
             }
 
-            String message = commitMess.toString().substring(0, commitMess.length() - 1);
-            Commit.commit(dotGurtPath,message);
+            String message = commitMess.toString().trim();
+            Commit.commit(dotGurtPath, message);
         }
+
 
         else if (args[0].equals("write-tree"))
         {
@@ -129,6 +122,17 @@ public class Gurt
                 return;
             }
             Log.log(projRootDir);
+        }
+
+        else if (args[0].equals("status"))
+        {
+            if (!inGurtRepo)
+            {
+                System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
+                return;
+            }
+
+            Status.status(projRootDir);
         }
 
         else

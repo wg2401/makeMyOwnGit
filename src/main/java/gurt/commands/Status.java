@@ -106,13 +106,19 @@ public class Status
        }
     }
 
-    //recurses thru all dirs and adds path names from index to respective lists
+    //recurses thru all dirs and adds path names from index to respective lists (skipping .gurt)
     //pass in projRoot Dir (absolute path), so curDir will always be an absolute path
     //ArrayLists contain relativized paths
     private static void findHashes(Path curDir, ArrayList<String> toCommit, ArrayList<String> unstaged, ArrayList<String> untracked, Path projRootDir, HashMap<Path,String> fileToHash)
     {
+        
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir)) 
         {   
+            if (curDir.equals(projRootDir.resolve(".gurt")))
+            {
+                return;
+            }
+            
             //recurse to add to lists
             for (Path p : stream)
             {
