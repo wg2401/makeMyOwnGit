@@ -13,6 +13,8 @@ public class Log
     {
         try
         {
+            System.out.println();
+
             Path dotGurtPath = projRootDir.resolve(".gurt");
             Path objectsPath = dotGurtPath.resolve("objects");
             Path headPath = dotGurtPath.resolve("HEAD");
@@ -123,7 +125,6 @@ public class Log
 
                 System.out.println("commit: " + latestCommitHash);
                 System.out.println(message.toString());
-                System.out.println();
             }
         }
         catch (IOException e)
