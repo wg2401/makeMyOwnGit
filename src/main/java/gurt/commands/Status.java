@@ -51,9 +51,11 @@ public class Status
 
             //get cur branch name
             String[] headParts = headText.split(" ");
-            String branchPathString = headParts[0];
-            Path branchAbsolutePath = projRootDir.resolve(branchPathString);
-            String branchName = branchAbsolutePath.getFileName().toString();
+            String branchPathString = headParts[1];
+            Path branchAbsolutePath = dotGurtPath.resolve(branchPathString);
+            // String branchName = branchAbsolutePath.getFileName().toString();
+            Path refsHeadPath = dotGurtPath.resolve("refs").resolve("heads");
+            String branchName = (refsHeadPath.relativize(branchAbsolutePath)).toString();
 
             System.out.println("On branch " + branchName + ":");
             System.out.println();
@@ -114,11 +116,11 @@ public class Status
         
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir)) 
         {   
-            if (curDir.equals(projRootDir.resolve(".gurt")))
+            if (curDir.equals(projRootDir.resolve(".gurt")) || curDir.equals(projRootDir.resolve(".git")))
             {
                 return;
             }
-            
+
             //recurse to add to lists
             for (Path p : stream)
             {
