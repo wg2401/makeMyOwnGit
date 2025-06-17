@@ -124,8 +124,23 @@ public class WriteTree
                     curDP = dirs.get(dirP);
                 }
                 
+                // if no more files then write directory entry 
+                if (curFP == null) 
+                {
+                    byte[] subtreeHash = writeSubTrees(curDP, filesInDirectories, fileNameToHash, projRootPath);
+                    //write the directory's flat file name
+                    Path relPath = curDP.getFileName();
+
+                    treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
+                    treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
+                    treeContentStream.write(0);
+                    treeContentStream.write(subtreeHash);
+
+                    dirP++;
+                }
+
                 //write file to tree
-                if (curDP == null || curFP.compareTo(curDP) < 0 || dirP >= dirs.size())
+                else if (curDP == null || curFP.compareTo(curDP) < 0 || dirP >= dirs.size())
                 {
                     //convert absolute path back to relative path
                     Path relF = projRootPath.relativize(curFP);
@@ -146,8 +161,8 @@ public class WriteTree
                     //get hash from recursive call
                     byte[] subtreeHash = writeSubTrees(curDP, filesInDirectories, fileNameToHash, projRootPath);
 
-                    //convert absolute path to rel path
-                    Path relPath = projRootPath.relativize(curDP);
+                    //write the directory's flat file name
+                    Path relPath = curDP.getFileName();
 
                     treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
                     treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
@@ -243,9 +258,25 @@ public class WriteTree
                 {
                     curDP = dirRelPaths.get(dirP);
                 }
-                
+
+                //if no more files then write dir
+                if (curFP == null) 
+                {
+                    byte[] subtreeHash = writeSubTrees(curDP, filesInDirectories, fileNameToHash, projRootPath);
+                    
+                    //write in flat file name
+                    Path relPath = curDP;
+
+                    treeContentStream.write("040000 ".getBytes(StandardCharsets.UTF_8));
+                    treeContentStream.write(relPath.toString().getBytes(StandardCharsets.UTF_8));
+                    treeContentStream.write(0);
+                    treeContentStream.write(subtreeHash);
+
+                    dirP++;
+                }
+
                 //write file to tree
-                if (curDP == null || curFP.compareTo(curDP) < 0 || dirP >= dirRelPaths.size())
+                else if (curDP == null || curFP.compareTo(curDP) < 0 || dirP >= dirRelPaths.size())
                 {                    
                     treeContentStream.write("100644 ".getBytes(StandardCharsets.UTF_8));
                     //write curFP (path relativized with curDir) directly
