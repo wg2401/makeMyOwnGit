@@ -137,8 +137,9 @@ public class Add
                 String fileName = entryParts[1];
 
                 String absNormPathString = projRootDir.resolve(fileName).toAbsolutePath().normalize().toString();
-                
-                if (!filesTrack.containsKey(absNormPathString))
+
+                Path oldPath = Paths.get(absNormPathString);
+                if (!filesTrack.containsKey(absNormPathString) && Files.exists(oldPath))
                 {
                     filesTrack.put(absNormPathString, hash);
                     uniqueFiles.add(absNormPathString);
@@ -197,7 +198,7 @@ public class Add
             }
 
             System.out.println();
-            
+
             Files.writeString(indexPath, toWrite.toString());
             
         }
