@@ -24,12 +24,18 @@ public class Add
         Path gurtDir = projRootDir.resolve(".gurt");
         
         //tracking files to handle duplicate index entries
+        //absolute path string to hash strings
         HashMap<String,String> filesTrack = new HashMap<>();
         ArrayList<String> uniqueFiles = new ArrayList<>();
 
         //track duplicate directories to cut down runtime
         Set<Path> seenDirs = new HashSet<>();
         seenDirs.add(gurtDir.toAbsolutePath().normalize());
+
+        //track nonexistent file paths for deletion or warning; stores absolute path strings
+        HashSet<String> nonexistentFilesSet = new HashSet<>();
+        ArrayList<String> nonexistentFilesList = new ArrayList<>();
+        ArrayList<String> deletedFilesList = new ArrayList<>();
 
         //writing blobs to objects
         while (!toAdd.isEmpty())
@@ -42,13 +48,15 @@ public class Add
                 //get normalized absolute path for consistency
                 Path fPath = Paths.get(file);
                 Path absNormPath = fPath.toAbsolutePath().normalize();
+
+                String absNormPathString = absNormPath.toString();
+
                 if (!Files.exists(absNormPath)) 
                 {
-                    System.err.println("warning: file does not exist, skipping: " + absNormPath);
+                    nonexistentFilesSet.add(absNormPathString);
+                    nonexistentFilesList.add(absNormPathString);
                     continue;
                 }
-                
-                String absNormPathString = absNormPath.toString();
 
                 //directory handling:
                 if (Files.isDirectory(absNormPath))
@@ -145,12 +153,51 @@ public class Add
 
             for (String file : uniqueFiles)
             {
+                if (nonexistentFilesSet.contains(file))
+                {
+                    nonexistentFilesSet.remove(file);
+                    deletedFilesList.add(file);
+                    continue;
+                }
+
                 Path fPath = Paths.get(file);
                 Path relPath = projRootDir.relativize(fPath);
 
                 toWrite.append(filesTrack.get(file) + " " + relPath.toString() + newLine);
+                
             }
 
+            System.out.println();
+
+            if (!deletedFilesList.isEmpty())
+            {
+                System.out.println("Staging for deletion: ");
+            }
+
+            for (String file : deletedFilesList)
+            {  
+                Path fPath = Paths.get(file);
+                String pathString = projRootDir.relativize(fPath).toString();
+                System.out.println("    " + pathString);
+            }
+
+            if (nonexistentFilesList.size() - deletedFilesList.size() > 0)
+            {
+                System.out.println("Skipping following nonexistent files:");
+            }
+
+            for (String file : nonexistentFilesList)
+            {
+                if (nonexistentFilesSet.contains(file))
+                {
+                    Path fPath = Paths.get(file);
+                    String pathString = projRootDir.relativize(fPath).toString();
+                    System.out.println("    " + pathString);
+                }
+            }
+
+            System.out.println();
+            
             Files.writeString(indexPath, toWrite.toString());
             
         }
