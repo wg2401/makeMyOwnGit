@@ -18,6 +18,9 @@ public class Branch
 
     public void branchList(Path projRootDir)
     {
+        Path dotGurtPath = projRootDir.resolve(".gurt");
+        Path branchesPath = dotGurtPath.resolve("refs").resolve("heads");
+
         
     }
 }

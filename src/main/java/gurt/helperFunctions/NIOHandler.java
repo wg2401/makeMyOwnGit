@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
-
+import java.util.ArrayList;
 
 public class NIOHandler 
 {
@@ -104,6 +104,32 @@ public class NIOHandler
             System.out.println(e);
         }
 
+    }
+
+    //recursive
+    //takes in absolute path for refs/heads as well as curDir (absolute path) and adds relative path strings (to refs/heads) to branchList
+    public static void branchesList(Path branchesPath, Path curDir, ArrayList<String> branchList)
+    {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir)) 
+        {
+            for (Path p : stream)
+            {
+                if (Files.isDirectory(p))
+                {
+                    branchesList(branchesPath, p, branchList);
+                }
+                else if (Files.isRegularFile(p))
+                {
+                    Path relPath = branchesPath.relativize(p);
+                    
+                    branchList.add(relPath.toString());
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            System.out.println("branch listing error: " + e.getMessage());
+        }
     }
 
 
