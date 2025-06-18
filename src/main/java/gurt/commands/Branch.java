@@ -74,6 +74,7 @@ public class Branch
                 validDirCheck = validDirCheck.getParent();
             }
 
+            System.out.println(newBranchPath.toString());
             Files.createDirectories(newBranchPath.getParent());
             Files.writeString(newBranchPath, curCom + System.lineSeparator());
 
