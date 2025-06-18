@@ -135,6 +135,20 @@ public class Gurt
             Status.status(projRootDir);
         }
 
+        else if (args[0].equals("branch"))
+        {
+            if (!inGurtRepo)
+            {
+                System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
+                return;
+            }
+
+            if (args.length == 1)
+            {
+                Branch.branchList(projRootDir);
+            }
+        }
+
         else
         {
             System.out.println("command not found");

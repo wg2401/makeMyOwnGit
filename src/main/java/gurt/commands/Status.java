@@ -53,7 +53,6 @@ public class Status
             String[] headParts = headText.split(" ");
             String branchPathString = headParts[1];
             Path branchAbsolutePath = dotGurtPath.resolve(branchPathString);
-            // String branchName = branchAbsolutePath.getFileName().toString();
             Path refsHeadPath = dotGurtPath.resolve("refs").resolve("heads");
             String branchName = (refsHeadPath.relativize(branchAbsolutePath)).toString();
 
