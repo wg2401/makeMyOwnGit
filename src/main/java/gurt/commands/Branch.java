@@ -24,18 +24,24 @@ public class Branch
             String headText = Files.readString(headPath);
             String refsString = new String();
             
+            String curCom = "";
+
             if (headText.startsWith("ref:")) 
             {
                 refsString = headText.substring("ref:".length()).trim();
-            }
             
-            Path refsPath = dotGurtPath.resolve(refsString);
-            String curCom = "";
             
-            if (Files.exists(refsPath))
-            {
-                curCom = Files.readString(refsPath).trim();
+                Path refsPath = dotGurtPath.resolve(refsString);
+                
+                if (Files.exists(refsPath))
+                {
+                    curCom = Files.readString(refsPath).trim();
+                }
 
+            }
+            else
+            {
+                curCom = headText.trim();
             }
 
             Path newBranchPath = branchesPath.resolve(branchName);
@@ -64,15 +70,17 @@ public class Branch
                     System.out.println("fatal: " + validDirCheck + "' is not a directory");
                     return;
                 }
+
+                validDirCheck = validDirCheck.getParent();
             }
 
             Files.createDirectories(newBranchPath.getParent());
-            Files.writeString(newBranchPath, curCom);
+            Files.writeString(newBranchPath, curCom + System.lineSeparator());
 
         }
         catch(IOException e)
         {
-
+            System.out.println(e);
         }
     }
 
@@ -86,10 +94,13 @@ public class Branch
 
             //get current branch:
             String headText = Files.readString(headPath);
-            String[] headParts = headText.split(" ");
-            String branchPathString = headParts[1];
-            Path branchAbsolutePath = dotGurtPath.resolve(branchPathString);
-            String curBranchName = (branchesPath.relativize(branchAbsolutePath)).toString();
+
+            String curBranchName = null;
+            if (headText.startsWith("ref:")) 
+            {
+                String refPath = headText.substring(5).trim();
+                curBranchName = branchesPath.relativize(dotGurtPath.resolve(refPath)).toString();
+            }
 
             ArrayList<String> branchNames = new ArrayList<>();
 
@@ -101,7 +112,7 @@ public class Branch
             System.out.println();
             for (String branch : branchNames)
             {
-                if (curBranchName.equals(branch))
+                if (curBranchName != null && curBranchName.equals(branch))
                 {
                     System.out.print("*");
                 }

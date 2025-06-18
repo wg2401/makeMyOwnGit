@@ -74,7 +74,7 @@ public class Commit
 
             
             //update refs path
-            Files.writeString(refsPath, commitHashString, StandardCharsets.UTF_8, 
+            Files.writeString(refsPath, commitHashString + System.lineSeparator(), StandardCharsets.UTF_8, 
             StandardOpenOption.CREATE,  StandardOpenOption.TRUNCATE_EXISTING);
 
         }
