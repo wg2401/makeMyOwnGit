@@ -147,6 +147,11 @@ public class Gurt
             {
                 Branch.branchList(projRootDir);
             }
+            
+            else if (args.length == 2)
+            {
+                Branch.branchNew(projRootDir, args[1]);
+            }
         }
 
         else

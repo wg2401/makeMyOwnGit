@@ -8,11 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 
 
 public class Branch 
 {
-    public void branchNew(Path projRootDir, String branchName)
+    public static void branchNew(Path projRootDir, String branchName)
     {
         try
         {
@@ -74,7 +75,7 @@ public class Branch
                 validDirCheck = validDirCheck.getParent();
             }
 
-            System.out.println(newBranchPath.toString());
+            System.out.println("test branch name: " + newBranchPath.toString());
             Files.createDirectories(newBranchPath.getParent());
             Files.writeString(newBranchPath, curCom + System.lineSeparator());
 
@@ -104,11 +105,18 @@ public class Branch
             }
 
             ArrayList<String> branchNames = new ArrayList<>();
+            HashSet<String> seenBranches = new HashSet<>();
 
             //recurse
-            NIOHandler.branchesList(branchesPath, branchesPath, branchNames);
+            NIOHandler.branchesList(branchesPath, branchesPath, branchNames, seenBranches);
 
             Collections.sort(branchNames);
+
+            //guard against freshly inited repo (no refs)
+            if (!seenBranches.contains(curBranchName))
+            {
+                branchNames.add(curBranchName);
+            }
 
             System.out.println();
             for (String branch : branchNames)
