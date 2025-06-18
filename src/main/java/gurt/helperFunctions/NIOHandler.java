@@ -51,7 +51,6 @@ public class NIOHandler
 
         if (normalizedDir.startsWith(gurtDir))
         {
-            System.err.println("warning: skipping internal metadata: " + normalizedDir);
             return;
         }
 
