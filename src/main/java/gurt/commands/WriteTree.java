@@ -45,7 +45,7 @@ public class WriteTree
 
                 //link files paths to different hashes, and files to their directories
                 byte[] blobHashedBytes = ByteHandler.hexStringToBytes(hash);
-                Path filePath = projRootPath.resolve(filename).normalize();;
+                Path filePath = projRootPath.resolve(filename).normalize();
                 Path fileHomeDir = filePath.getParent();
                 if (fileHomeDir == null) 
                 {
@@ -65,6 +65,18 @@ public class WriteTree
                     filesInDirectories.put(fileHomeDir, fileList);
                     
                     fileNameToHash.put(filename, blobHashedBytes);
+                }
+
+                //make sure all of the file's ancestors are added to filesInDirectories
+                Path nextAncestor = fileHomeDir.getParent();
+                if (!fileHomeDir.equals(projRootPath))
+                {
+                    while (!nextAncestor.equals(projRootPath) && !filesInDirectories.containsKey(nextAncestor))
+                    {
+                        ArrayList<String> fileList = new ArrayList<>();
+                        filesInDirectories.put(nextAncestor, fileList);
+                        nextAncestor = nextAncestor.getParent();
+                    }
                 }
             }
 
@@ -262,7 +274,8 @@ public class WriteTree
                 //if no more files then write dir
                 if (curFP == null) 
                 {
-                    byte[] subtreeHash = writeSubTrees(curDP, filesInDirectories, fileNameToHash, projRootPath);
+                    Path absDir = curDir.resolve(curDP).normalize();
+                    byte[] subtreeHash = writeSubTrees(absDir, filesInDirectories, fileNameToHash, projRootPath);
                     
                     //write in flat file name
                     Path relPath = curDP;
