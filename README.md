@@ -3,7 +3,7 @@ gurt: yo
 
 This is a git replication that handles the following methods: init, add, commit, write-tree, branch, checkout, log, status, and merge.
 Implements SHA 256 hashing for reduced chance of file collision
-Note: does not support symlinks yet
+Note: does not support symlinks yet; be careful not to use them when testing!
 
 Instructions for build: 
 After cloning, run  ./gradlew clean build
