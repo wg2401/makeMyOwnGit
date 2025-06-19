@@ -172,6 +172,17 @@ public class Gurt
             {
                 Checkout.checkoutHash(projRootDir, args[2]);
             }
+
+            else if (args[1].equals("branch"))
+            {
+                Checkout.checkoutBranch(projRootDir, args[2]);
+            }
+
+            else
+            {
+                System.out.println("invalid args, usage: checkout hash/branch <input>");
+                return; 
+            }
         }
 
         else

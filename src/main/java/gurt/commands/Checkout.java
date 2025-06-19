@@ -75,7 +75,8 @@ public class Checkout
             {
                 if (component.equals(""))
                 {
-                    continue;
+                    System.out.println("error: invalid branch format");
+                    return;
                 }
                 bPath = bPath.resolve(component);
             }
@@ -88,6 +89,7 @@ public class Checkout
 
             //get commit hash and use to rebuild repo
             String hashString = Files.readString(bPath).trim();
+
             GurtFileHandler.rebuildRepo(projRootDir, hashString);
             Files.writeString(headPath, "ref: " + "refs/heads/" + branchName + System.lineSeparator());
 

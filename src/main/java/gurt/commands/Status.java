@@ -68,7 +68,7 @@ public class Status
                 Path refsHeadPath = dotGurtPath.resolve("refs").resolve("heads");
                 branchName = (refsHeadPath.relativize(branchAbsolutePath)).toString();
             }
-            System.out.println("On branch " + branchName + ":");
+            System.out.println("On branch " + branchName);
             System.out.println();
 
             System.out.println("Changes to be committed:");
