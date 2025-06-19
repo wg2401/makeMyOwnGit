@@ -73,10 +73,14 @@ public class Checkout
 
             for (String component : pathComponents)
             {
+                if (component.equals(""))
+                {
+                    continue;
+                }
                 bPath = bPath.resolve(component);
             }
 
-            if (!Files.exists(bPath))
+            if (!Files.isRegularFile(bPath))
             {
                 System.out.println("error: branch doesn't exist");
                 return;
