@@ -1,4 +1,4 @@
-# Gurt
+# gurt: yo
 
 Gurt is a git replication written in Java with SHA 256 hashing for reduced collision risk. Designed for educational and experimental purposes.
 Symlinks are not yet supported; avoid them when testing.
