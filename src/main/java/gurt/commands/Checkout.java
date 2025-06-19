@@ -11,9 +11,13 @@ import java.util.HashSet;
 
 public class Checkout
 {
-    public static void checkoutHash()
+    public static void checkoutHash(Path projRootDir, String commitHash)
     {
 
+
+
+        GurtFileHandler.rebuildRepo(projRootDir, commitHash);
+        System.out.println("HEAD is now in a detached state");
     }
 
     public static void checkoutBranch(String branchName)
@@ -21,5 +25,5 @@ public class Checkout
 
     }
 
-    
+
 }

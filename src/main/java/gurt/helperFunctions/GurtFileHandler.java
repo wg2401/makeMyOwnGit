@@ -190,7 +190,7 @@ public class GurtFileHandler
         }
     }
 
-    //takes in projRootDir (absolute path) and a string for the commitHash
+    //helper for checkout; takes in projRootDir (absolute path) and a string for the commitHash
     public static void rebuildRepo(Path projRootDir, String commitHash)
     {
         try
