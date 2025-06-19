@@ -9,7 +9,7 @@ Instructions for build:
 After cloning, run  ./gradlew clean build
 Then add this line to your shell config: alias gurt='java -jar /absolute/path/to/build/libs/gurt.jar'
 
-To use: run gurt command
+To use: run <gurt command>
     gurt init
     gurt add <files/directories>
     gurt commit "message"
