@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 
 public class Status
@@ -40,7 +41,7 @@ public class Status
             if (Files.exists(refsPath))
             {
                 String prevCom = Files.readString(refsPath).trim();
-                GurtFileHandler.loadCommit(fileToHash, prevCom, projRootDir);
+                GurtFileHandler.loadCommit(fileToHash, prevCom, projRootDir, new HashSet<Path>());
             }
 
             //load files into lists

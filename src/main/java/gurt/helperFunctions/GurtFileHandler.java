@@ -6,6 +6,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -93,7 +94,8 @@ public class GurtFileHandler
     }
 
     //fills hashmap with absolute path -> hash pairings for the given commit hash
-    public static void loadCommit(HashMap<Path, String> fileToHash, String hash, Path projRootDir)
+    //also tracks directories that are ancestors of tracked files for this commit
+    public static void loadCommit(HashMap<Path, String> fileToHash, String hash, Path projRootDir, HashSet<Path> dirs)
     {
         try
         {
@@ -116,7 +118,7 @@ public class GurtFileHandler
             String treeRootHash = fields[0];
             treeRootHash = treeRootHash.substring(5);
 
-            subTreeRecurse(projRootDir, treeRootHash, projRootDir, fileToHash);
+            subTreeRecurse(projRootDir, treeRootHash, projRootDir, fileToHash, dirs);
         }
         catch (IOException e)
         {
@@ -127,12 +129,14 @@ public class GurtFileHandler
 
     //recursively add files to map from subtree objects
     //takes in projRootDir (absolute path) and maps file abs path -> hash
-    public static void subTreeRecurse(Path curDir, String treeHash, Path projRootDir, HashMap<Path, String> fileToHash)
+    public static void subTreeRecurse(Path curDir, String treeHash, Path projRootDir, HashMap<Path, String> fileToHash, HashSet<Path> dirs)
     {
         try
         {
             Path dotGurt = projRootDir.resolve(".gurt");
             Path objectPath = dotGurt.resolve("objects");
+
+            dirs.add(curDir);
 
             //read in and clean tree object:
             String firstTwo = treeHash.substring(0,2);
@@ -180,7 +184,7 @@ public class GurtFileHandler
                 
                 else if (mode.equals("040000"))
                 {
-                    subTreeRecurse(absPath, hashString, projRootDir, fileToHash);
+                    subTreeRecurse(absPath, hashString, projRootDir, fileToHash, dirs);
                 }
             }
             
@@ -201,7 +205,8 @@ public class GurtFileHandler
             Path objectsPath = dotGurtPath.resolve("objects");
             
             HashMap<Path, String> fileToHash = new HashMap<>();
-            loadCommit(fileToHash, commitHash, projRootDir);
+            HashSet<Path> dirs = new HashSet<>();
+            loadCommit(fileToHash, commitHash, projRootDir, dirs);
             rebuildRepoHelper(projRootDir, projRootDir, fileToHash);
 
             //now build missing files, iterate thru hashmap
@@ -257,6 +262,9 @@ public class GurtFileHandler
             }
 
             Files.writeString(indexPath, toWrite.toString(), StandardCharsets.UTF_8);
+
+            //delete nontracked directories
+
         }
         catch (IOException e)
         {
@@ -314,5 +322,11 @@ public class GurtFileHandler
         {
             System.out.println("repo rebuild error: " + e.getMessage());
         }
+    }
+
+    //helper for rebuild, takes in projRootDir(absolute path)
+    public static void deleteUntrackedDirs()
+    {
+        
     }
 }
