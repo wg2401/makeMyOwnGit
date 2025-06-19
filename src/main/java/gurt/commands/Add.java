@@ -168,20 +168,6 @@ public class Add
                 
             }
 
-            System.out.println();
-
-            if (!deletedFilesList.isEmpty())
-            {
-                System.out.println("Staging for deletion: ");
-            }
-
-            for (String file : deletedFilesList)
-            {  
-                Path fPath = Paths.get(file);
-                String pathString = projRootDir.relativize(fPath).toString();
-                System.out.println("    " + pathString);
-            }
-
             if (nonexistentFilesList.size() - deletedFilesList.size() > 0)
             {
                 System.out.println("Skipping following nonexistent files:");

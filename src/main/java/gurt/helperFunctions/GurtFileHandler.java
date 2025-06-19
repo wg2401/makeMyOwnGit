@@ -2,6 +2,7 @@ package gurt.helperFunctions;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -183,6 +184,56 @@ public class GurtFileHandler
         catch(IOException e)
         {
             System.out.println(e);
+        }
+    }
+
+    //takes in fileToHash (file abs path -> blob hash string) and curDir (absolute path)
+    //recurses thru repo and replaces files with associated blobs
+    public static void rebuildRepoHelper(Path curDir, Path projRootDir, HashMap<Path, String> fileToHash)
+    {
+        Path dotGurtPath = projRootDir.resolve(".gurt");
+        Path objectsPath = dotGurtPath.resolve("objects");
+        if (curDir.equals(dotGurtPath))
+        {
+            return; 
+        }
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir)) 
+        {
+            for (Path p : stream)
+            {
+                if (Files.isDirectory(p))
+                {
+                    rebuildRepoHelper(p, projRootDir, fileToHash);
+                }
+                
+                if (Files.isRegularFile(p))
+                {
+                    if (fileToHash.containsKey(p))
+                    {
+                        String blobHash = fileToHash.get(p);
+                        String blobDirName = blobHash.substring(0,2);
+                        String blobFileName = blobHash.substring(2);
+                        
+                        Path blobDir = objectsPath.resolve(blobDirName);
+                        Path blobFile = blobDir.resolve(blobFileName);
+
+                        byte[] blob = Files.readAllBytes(blobFile);
+                        byte[] blobContent = removeHeader(blob);
+
+                        Files.write(p, blobContent);
+                    }
+
+                    else
+                    {
+                        Files.delete(p);
+                    }
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            System.out.println("repo rebuild error: " + e.getMessage());
         }
     }
 }
