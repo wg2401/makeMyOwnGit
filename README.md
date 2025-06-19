@@ -30,33 +30,31 @@ Run commands in the following format:
 
 gurt <command>
 Available Commands:
-gurt init
-Initialize a new Gurt repository.
+gurt init: Initialize a new Gurt repository.
 
-gurt add `<files/directories>`
+gurt add: `<files/directories>`
 Stage files or directories for commit.
 
-gurt commit "message"
+gurt commit: "message"
 Commit staged changes with a message.
 
-gurt write-tree
-Serialize the current state of the staging area into a tree object.
+gurt write-tree: Serialize the current state of the staging area into a tree object.
 
-gurt branch
+gurt branch:
 List all branches.
 
-gurt branch `<branch-name>`
+gurt branch `<branch-name>`:
 Create a new branch.
 
-gurt log
+gurt log:
 Show commit history.
 
-gurt status
+gurt status:
 Show current status of working directory.
 
-gurt checkout `<branch-name>`
+gurt checkout `<branch-name>`:
 Switch to the specified branch.
 
-gurt checkout `<commit-hash>`
+gurt checkout `<commit-hash>`:
 Switch to a specific commit state and detach HEAD.
 
