@@ -29,18 +29,26 @@ public class Status
             //get current commit and load it into map
             String headText = Files.readString(headPath);
             String refsString = new String();
+            HashMap<Path, String> fileToHash = new HashMap<>();
+
+            //load in commit data
             if (headText.startsWith("ref:")) 
             {
                 refsString = headText.substring("ref:".length()).trim();
+            
+                Path refsPath = dotGurtPath.resolve(refsString);
+
+                //load latest commit blobs
+                if (Files.exists(refsPath))
+                {
+                    String prevCom = Files.readString(refsPath).trim();
+                    GurtFileHandler.loadCommit(fileToHash, prevCom, projRootDir, new HashSet<Path>());
+                }
             }
-            Path refsPath = dotGurtPath.resolve(refsString);
-
-            HashMap<Path, String> fileToHash = new HashMap<>();
-
-            //load latest commit blobs
-            if (Files.exists(refsPath))
+            else
             {
-                String prevCom = Files.readString(refsPath).trim();
+                //handle detached HEAD
+                String prevCom = headText.trim();
                 GurtFileHandler.loadCommit(fileToHash, prevCom, projRootDir, new HashSet<Path>());
             }
 
@@ -51,12 +59,15 @@ public class Status
             findHashes(projRootDir, toCommit, unstaged, untracked, projRootDir, fileToHash);
 
             //get cur branch name
-            String[] headParts = headText.split(" ");
-            String branchPathString = headParts[1];
-            Path branchAbsolutePath = dotGurtPath.resolve(branchPathString);
-            Path refsHeadPath = dotGurtPath.resolve("refs").resolve("heads");
-            String branchName = (refsHeadPath.relativize(branchAbsolutePath)).toString();
-
+            String branchName = "DETACHED";
+            if (headText.startsWith("ref:")) 
+            {
+                String[] headParts = headText.split(" ");
+                String branchPathString = headParts[1];
+                Path branchAbsolutePath = dotGurtPath.resolve(branchPathString);
+                Path refsHeadPath = dotGurtPath.resolve("refs").resolve("heads");
+                branchName = (refsHeadPath.relativize(branchAbsolutePath)).toString();
+            }
             System.out.println("On branch " + branchName + ":");
             System.out.println();
 
@@ -116,7 +127,8 @@ public class Status
         
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir)) 
         {   
-            if (curDir.equals(projRootDir.resolve(".gurt")) || curDir.equals(projRootDir.resolve(".git")))
+            Path dotGurt = projRootDir.resolve(".gurt").toAbsolutePath().normalize();
+            if ((curDir.toAbsolutePath().normalize().startsWith(dotGurt)) || curDir.equals(projRootDir.resolve(".git")))
             {
                 return;
             }
