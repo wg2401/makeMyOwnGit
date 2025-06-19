@@ -7,9 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Collections;
 
 public class GurtFileHandler 
 {
@@ -191,6 +192,7 @@ public class GurtFileHandler
     }
 
     //helper for checkout; takes in projRootDir (absolute path) and a string for the commitHash
+    //also reconstructs index
     public static void rebuildRepo(Path projRootDir, String commitHash)
     {
         try
@@ -228,6 +230,33 @@ public class GurtFileHandler
 
                 }
             }
+
+            //rebuilding index:
+            Path indexPath = dotGurtPath.resolve("index");
+            HashMap<String, String> relPathToHash = new HashMap<>();
+            ArrayList<String> relPathList = new ArrayList<>();
+
+            Iterator<Path> it2 = fileToHash.keySet().iterator();
+            while (it2.hasNext())
+            {
+                Path curPath = it2.next();
+                Path relPath = projRootDir.relativize(curPath);
+                relPathList.add(relPath.toString());
+
+                String hashString = fileToHash.get(curPath);
+                relPathToHash.put(relPath.toString(), hashString);
+            }
+
+            Collections.sort(relPathList);
+
+            StringBuilder toWrite = new StringBuilder();
+            for (String file : relPathList)
+            {
+                String hash = relPathToHash.get(file);
+                toWrite.append(hash + " " + file + '\n');
+            }
+
+            Files.writeString(indexPath, toWrite.toString(), StandardCharsets.UTF_8);
         }
         catch (IOException e)
         {

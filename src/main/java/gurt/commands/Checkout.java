@@ -50,6 +50,8 @@ public class Checkout
             GurtFileHandler.rebuildRepo(projRootDir, commitHash);
             Files.writeString(headPath, commitHash + System.lineSeparator());
             System.out.println("HEAD is now in a detached state");
+
+            
         }
         catch (IOException e)
         {
