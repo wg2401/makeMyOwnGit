@@ -22,7 +22,9 @@ Symlinks are not yet supported; avoid them when testing.
 ./gradlew clean build
 ```
 Then add the following line to your shell config (e.g., .bashrc, .zshrc, etc.):
+```bash
 alias gurt='java -jar /absolute/path/to/build/libs/gurt.jar'
+```
 
 
 ## Usage
