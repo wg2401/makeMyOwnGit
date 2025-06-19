@@ -26,10 +26,9 @@ alias gurt='java -jar /absolute/path/to/build/libs/gurt.jar'
 
 
 ## Usage
-Run commands in the following format:
-
-gurt <command>
 Available Commands:
+
+
 gurt init: Initialize a new Gurt repository.
 
 gurt add: `<files/directories>`
