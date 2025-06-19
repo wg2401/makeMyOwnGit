@@ -2,12 +2,10 @@ package gurt.helperFunctions;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class ByteHandler 
 {
