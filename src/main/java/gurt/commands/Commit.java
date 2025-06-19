@@ -40,7 +40,7 @@ public class Commit
                 System.out.println("Currently in detached state; no commits allowed");
                 return;
             }
-
+            
             Path refsPath = dotGurtPath.resolve(refsString);
             if (Files.exists(refsPath))
             {

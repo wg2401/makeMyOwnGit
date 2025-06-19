@@ -112,7 +112,7 @@ public class Branch
             Collections.sort(branchNames);
 
             //guard against freshly inited repo (no refs)
-            if (!seenBranches.contains(curBranchName))
+            if (!seenBranches.contains(curBranchName) && curBranchName != null)
             {
                 branchNames.add(curBranchName);
             }
