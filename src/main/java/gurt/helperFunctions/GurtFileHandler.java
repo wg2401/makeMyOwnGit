@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class GurtFileHandler 
 {
@@ -121,6 +123,7 @@ public class GurtFileHandler
         }
     }
 
+
     //recursively add files to map from subtree objects
     //takes in projRootDir (absolute path) and maps file abs path -> hash
     public static void subTreeRecurse(Path curDir, String treeHash, Path projRootDir, HashMap<Path, String> fileToHash)
@@ -187,13 +190,58 @@ public class GurtFileHandler
         }
     }
 
+    //takes in projRootDir (absolute path) and a string for the commitHash
+    public static void rebuildRepo(Path projRootDir, String commitHash)
+    {
+        try
+        {
+            Path dotGurtPath = projRootDir.resolve(".gurt");
+            Path objectsPath = dotGurtPath.resolve("objects");
+            
+            HashMap<Path, String> fileToHash = new HashMap<>();
+            loadCommit(fileToHash, commitHash, projRootDir);
+            rebuildRepoHelper(projRootDir, projRootDir, fileToHash);
+
+            //now build missing files, iterate thru hashmap
+            Iterator<Path> it = fileToHash.keySet().iterator();
+            while (it.hasNext())
+            {
+                Path curPath = it.next();
+                if (Files.isDirectory(curPath))
+                {
+                    NIOHandler.deleteDirectoryRecursive(curPath, dotGurtPath);
+                }
+                if (!Files.exists(curPath))
+                {
+                    Files.createDirectories(curPath.getParent());
+                    String blobHash = fileToHash.get(curPath);
+                    String blobDirName = blobHash.substring(0,2);
+                    String blobFileName = blobHash.substring(2);
+
+                    Path blobDir = objectsPath.resolve(blobDirName);
+                    Path blobFile = blobDir.resolve(blobFileName);
+
+                    byte[] blob = Files.readAllBytes(blobFile);
+                    byte[] blobContent = removeHeader(blob);
+
+                    Files.write(curPath, blobContent);
+
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            System.out.println(e);
+        }
+    }
+
     //takes in fileToHash (file abs path -> blob hash string) and curDir (absolute path)
     //recurses thru repo and replaces files with associated blobs
     public static void rebuildRepoHelper(Path curDir, Path projRootDir, HashMap<Path, String> fileToHash)
     {
         Path dotGurtPath = projRootDir.resolve(".gurt");
         Path objectsPath = dotGurtPath.resolve("objects");
-        if (curDir.equals(dotGurtPath))
+        if (curDir.startsWith(dotGurtPath))
         {
             return; 
         }
@@ -212,6 +260,7 @@ public class GurtFileHandler
                 {
                     if (fileToHash.containsKey(p))
                     {
+                        Files.createDirectories(p.getParent());
                         String blobHash = fileToHash.get(p);
                         String blobDirName = blobHash.substring(0,2);
                         String blobFileName = blobHash.substring(2);

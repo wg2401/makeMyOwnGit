@@ -134,5 +134,57 @@ public class NIOHandler
         }
     }
 
+    //pass in absolute path
+    public static void deleteDirectoryRecursive(Path curDir, Path gurtDir)
+    {
+        Path normalizedDir = curDir.toAbsolutePath().normalize();
+
+        if (normalizedDir.startsWith(gurtDir))
+        {
+            return;
+        }
+
+        if (!Files.exists(normalizedDir))
+        {
+            return;
+        }
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(normalizedDir)) 
+        {
+            for (Path p : stream)
+            {
+                p = p.toAbsolutePath().normalize();
+
+                if (Files.isDirectory(p))
+                {
+                    deleteDirectoryRecursive(p, gurtDir); // recurse first
+                }
+                else
+                {
+                    try
+                    {
+                        Files.deleteIfExists(p);
+                    }
+                    catch (IOException e)
+                    {
+                        System.out.println("Failed to delete file: " + p + " — " + e.getMessage());
+                    }
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            System.out.println("Failed to read directory: " + normalizedDir + " — " + e.getMessage());
+        }
+
+        try
+        {
+            Files.deleteIfExists(normalizedDir);
+        }
+        catch (IOException e)
+        {
+            System.out.println("Failed to delete directory: " + normalizedDir + " — " + e.getMessage());
+        }
+    }
 
 }

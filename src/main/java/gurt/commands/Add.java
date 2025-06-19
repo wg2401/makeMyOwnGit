@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
-//todo: relativize paths, handle file deletion/nonexistent files, and handle directory inputs
+
 
 public class Add 
 {
@@ -61,6 +61,12 @@ public class Add
                 //directory handling:
                 if (Files.isDirectory(absNormPath))
                 {
+                    if (!absNormPath.startsWith(projRootDir))
+                    {
+                        System.out.println("error: " + file + " is not part of your gurt repo; skipping");
+                        continue;
+                    }
+
                     if (!seenDirs.contains(absNormPath))
                     {
                         List<Path> filesUnderDir = new ArrayList<>();
