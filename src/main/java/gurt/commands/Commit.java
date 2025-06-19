@@ -35,6 +35,11 @@ public class Commit
             {
                 refsString = headText.substring("ref:".length()).trim();
             }
+            else
+            {
+                System.out.println("Currently in detached state; no commits allowed");
+                return;
+            }
 
             Path refsPath = dotGurtPath.resolve(refsString);
             if (Files.exists(refsPath))
