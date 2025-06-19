@@ -19,23 +19,28 @@ public class Log
             Path objectsPath = dotGurtPath.resolve("objects");
             Path headPath = dotGurtPath.resolve("HEAD");
             
-            //get file pointer to refs from head:
+            //get file pointer to refs from head and read in commit hash:
+            String latestCommitHash = new String();
             String headText = Files.readString(headPath);
             String refsString = new String();
             if (headText.startsWith("ref:")) 
             {
                 refsString = headText.substring("ref:".length()).trim();
+
+                Path refsPath = dotGurtPath.resolve(refsString);
+
+                if (!Files.exists(refsPath))
+                {
+                    System.out.println("No commits yet");
+                    return;
+                }
+                latestCommitHash = Files.readString(refsPath).trim();
             }
-
-            Path refsPath = dotGurtPath.resolve(refsString);
-
-            if (!Files.exists(refsPath))
+            else
             {
-                System.out.println("No commits yet");
-                return;
+                latestCommitHash = headText.trim();
             }
-            
-            String latestCommitHash = Files.readString(refsPath).trim();
+
             String firstTwo = latestCommitHash.substring(0,2);
             String rest = latestCommitHash.substring(2);
 

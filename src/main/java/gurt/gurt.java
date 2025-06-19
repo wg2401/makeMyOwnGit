@@ -154,6 +154,26 @@ public class Gurt
             }
         }
 
+        else if (args[0].equals("checkout"))
+        {
+            if (!inGurtRepo)
+            {
+                System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
+                return;
+            }
+
+            if (args.length!=3)
+            {
+                System.out.println("invalid args, usage: checkout hash/branch <input>");
+                return;
+            }
+
+            if (args[1].equals("hash"))
+            {
+                Checkout.checkoutHash(projRootDir, args[2]);
+            }
+        }
+
         else
         {
             System.out.println("command not found");

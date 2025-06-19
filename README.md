@@ -53,9 +53,9 @@ Show commit history.
 gurt status:
 Show current status of working directory.
 
-gurt checkout `<branch-name>`:
+gurt checkout branch `<branch-name>`:
 Switch to the specified branch.
 
-gurt checkout `<commit-hash>`:
+gurt checkout hash `<commit-hash>`:
 Switch to a specific commit state and detach HEAD.
 
