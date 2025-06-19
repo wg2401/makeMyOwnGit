@@ -264,6 +264,7 @@ public class GurtFileHandler
             Files.writeString(indexPath, toWrite.toString(), StandardCharsets.UTF_8);
 
             //delete nontracked directories
+            deleteUntrackedDirs(projRootDir, dirs, projRootDir);
 
         }
         catch (IOException e)
@@ -325,8 +326,42 @@ public class GurtFileHandler
     }
 
     //helper for rebuild, takes in projRootDir(absolute path)
-    public static void deleteUntrackedDirs()
+    //dirs consists of absolute normalized paths
+    public static void deleteUntrackedDirs(Path projRootDir, HashSet<Path> dirs, Path curDir)
     {
-        
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(curDir)) 
+        {
+            for (Path p : stream)
+            {
+                if (p.startsWith(projRootDir.resolve(".gurt")))
+                {
+                    continue;
+                }
+                
+                if (!p.startsWith(projRootDir)) 
+                {
+                    continue;             
+                }
+
+                p = p.toAbsolutePath().normalize();
+
+                if (Files.isDirectory(p))
+                {
+
+                    if (dirs.contains(p))
+                    {
+                        deleteUntrackedDirs(projRootDir, dirs, p);
+                    }
+                    else
+                    {
+                        NIOHandler.deleteDirectoryRecursive(p, projRootDir.resolve(".gurt"));
+                    }
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            System.out.println("delete untracked dirs error: " + e);
+        }
     }
 }
