@@ -33,7 +33,7 @@ Available Commands:
 gurt init
 Initialize a new Gurt repository.
 
-gurt add <files/directories>
+gurt add `<files/directories>`
 Stage files or directories for commit.
 
 gurt commit "message"
@@ -45,7 +45,7 @@ Serialize the current state of the staging area into a tree object.
 gurt branch
 List all branches.
 
-gurt branch <branch-name>
+gurt branch `<branch-name>`
 Create a new branch.
 
 gurt log
@@ -54,9 +54,9 @@ Show commit history.
 gurt status
 Show current status of working directory.
 
-gurt checkout <branch-name>
+gurt checkout `<branch-name>`
 Switch to the specified branch.
 
-gurt checkout <commit-hash>
+gurt checkout `<commit-hash>`
 Switch to a specific commit state and detach HEAD.
 
