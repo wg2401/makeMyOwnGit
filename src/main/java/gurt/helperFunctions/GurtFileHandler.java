@@ -158,7 +158,7 @@ public class GurtFileHandler
                 String[] parts = entryFields.split(" ", 2);
                 String mode = parts[0];
                 String path = parts[1];
-                Path absPath = curDir.resolve(path);
+                Path absPath = curDir.resolve(path).toAbsolutePath().normalize();
 
                 //skip null pter
                 pointer++;
@@ -202,6 +202,7 @@ public class GurtFileHandler
         {
             for (Path p : stream)
             {
+                p = p.toAbsolutePath().normalize();
                 if (Files.isDirectory(p))
                 {
                     rebuildRepoHelper(p, projRootDir, fileToHash);
