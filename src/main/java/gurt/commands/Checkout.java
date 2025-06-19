@@ -59,9 +59,40 @@ public class Checkout
         }
     }
 
-    public static void checkoutBranch(String branchName)
+    public static void checkoutBranch(Path projRootDir, String branchName)
     {
+        try
+        {
+            Path dotGurtPath = projRootDir.resolve(".gurt");
+            Path headPath = dotGurtPath.resolve("HEAD");
+            Path branchesPath = dotGurtPath.resolve("refs").resolve("heads");
 
+            //getting path for inputted branch
+            String[] pathComponents = branchName.split("/");
+            Path bPath = branchesPath;
+
+            for (String component : pathComponents)
+            {
+                bPath = bPath.resolve(component);
+            }
+
+            if (!Files.exists(bPath))
+            {
+                System.out.println("error: branch doesn't exist");
+                return;
+            }
+
+            //get commit hash and use to rebuild repo
+            String hashString = Files.readString(bPath).trim();
+            GurtFileHandler.rebuildRepo(projRootDir, hashString);
+            Files.writeString(headPath, "ref: " + "refs/heads/" + branchName + System.lineSeparator());
+
+            System.out.println("Now working on " + branchName);
+        }
+        catch (IOException e)
+        {
+            System.out.println(e);
+        }
     }
 
 
