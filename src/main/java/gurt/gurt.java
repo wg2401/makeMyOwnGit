@@ -185,6 +185,25 @@ public class Gurt
             }
         }
 
+        else if (args[0].equals("merge"))
+        {
+            if (!inGurtRepo)
+            {
+                System.out.println("fatal: not a gurt repository (or any of the parent directories): .gurt");
+                return;
+            }
+
+            if (args.length!=2)
+            {
+                System.out.println("invalid args, usage: merge <branch>");
+            }
+
+            else
+            {
+                Merge.merge(projRootDir, args[1]);
+            }
+        }
+
         else
         {
             System.out.println("command not found");
