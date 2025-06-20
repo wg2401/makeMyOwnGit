@@ -59,3 +59,5 @@ Switch to the specified branch.
 gurt checkout hash `<commit-hash>`:
 Switch to a specific commit state and detach HEAD.
 
+gurt merge `<branch-name>`:
+Perform a three-way merge between branches
