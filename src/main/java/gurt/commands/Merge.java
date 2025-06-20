@@ -8,9 +8,6 @@ import java.nio.file.*;
 import java.util.*;
 
 
-//   TODO:
-//     • Implement GurtFileHandler.writeIndexFromMap(...)
-//     • Implement GurtFileHandler.rebuildRepoFromMap(...)
 
   
 public class Merge {
@@ -138,8 +135,8 @@ public class Merge {
 
             //write new index & work-tree
             Path indexPath = gurtDir.resolve("index");
-            GurtFileHandler.writeIndexFromMap(indexPath, resultMap);       // TODO
-            GurtFileHandler.rebuildRepoFromMap(projRootDir, resultMap);    // TODO
+            GurtFileHandler.writeIndexFromMap(indexPath, resultMap);       
+            GurtFileHandler.rebuildRepoFromMap(projRootDir, resultMap);    
 
             // create merge commit object
             String treeHash = WriteTree.writeTree(indexPath);

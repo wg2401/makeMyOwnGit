@@ -401,7 +401,7 @@ public class GurtFileHandler
 
         // Convert to “relPath → hash” pairs and sort by path 
         List<Map.Entry<String,String>> entries = new ArrayList<>();
-        Path repoRoot = indexPath.getParent().getParent().getParent();
+        Path repoRoot = indexPath.getParent().getParent();
 
         for (Map.Entry<Path,String> e : blobs.entrySet()) 
         {
