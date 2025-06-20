@@ -8,10 +8,12 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Collections;
+import java.util.Comparator;
 
 public class GurtFileHandler 
 {
@@ -364,4 +366,91 @@ public class GurtFileHandler
             System.out.println("delete untracked dirs error: " + e);
         }
     }
+
+
+    public static List<String> getParents(String commitHash, Path gurtDir) throws IOException 
+    {
+        Path objPath = gurtDir.resolve("objects").resolve(commitHash.substring(0,2)).resolve(commitHash.substring(2));
+
+        byte[] raw = Files.readAllBytes(objPath);
+        String body = new String(removeHeader(raw), StandardCharsets.UTF_8);
+
+        List<String> parents = new ArrayList<>();
+        for (String line : body.split("\n")) 
+        {
+            if (line.startsWith("parent ")) 
+            {
+                parents.add(line.substring(7).trim());
+            } 
+            else if (line.startsWith("tree ")) 
+            {
+
+            }
+            else if (line.isEmpty()) 
+            {
+                break;         // end of header section
+            }
+        }
+        
+        return parents;
+    }
+    
+
+    public static void writeIndexFromMap(Path indexPath, Map<Path,String> blobs) throws IOException 
+    {
+
+        // Convert to “relPath → hash” pairs and sort by path 
+        List<Map.Entry<String,String>> entries = new ArrayList<>();
+        Path repoRoot = indexPath.getParent().getParent().getParent();
+
+        for (Map.Entry<Path,String> e : blobs.entrySet()) 
+        {
+            String rel = repoRoot.relativize(e.getKey()).toString();
+            entries.add(Map.entry(rel, e.getValue()));
+        }
+        entries.sort(Comparator.comparing(Map.Entry::getKey));
+
+        StringBuilder sb = new StringBuilder();
+        for (var e : entries)
+        {
+            sb.append(e.getValue()).append(' ').append(e.getKey()).append('\n');
+        }
+
+        Files.writeString(indexPath, sb.toString(), StandardCharsets.UTF_8);
+    }
+
+
+    public static void rebuildRepoFromMap(Path repoRoot, Map<Path,String> blobs) throws IOException 
+    {
+        Path objects = repoRoot.resolve(".gurt").resolve("objects");
+
+        // rebuildRepoFromMap – also delete empty dirs & skip .git
+        Files.walk(repoRoot)
+            .sorted(Comparator.reverseOrder())       // bottom-up so dirs last
+            .forEach(p -> {
+                if (p.startsWith(repoRoot.resolve(".gurt")) ||
+                    p.startsWith(repoRoot.resolve(".git"))) return;
+
+                boolean keep = blobs.containsKey(p.toAbsolutePath().normalize());
+                try {
+                    if (Files.isRegularFile(p) && !keep) Files.delete(p);
+                    if (Files.isDirectory(p) && !keep && Files.list(p).findAny().isEmpty())
+                        Files.delete(p);
+                } catch (IOException ignored) {}
+            });
+
+
+        for (var e : blobs.entrySet()) 
+        {
+            Path abs = e.getKey().toAbsolutePath().normalize();
+            String hash = e.getValue();
+
+            Path blob = objects.resolve(hash.substring(0,2)).resolve(hash.substring(2));
+            byte[] raw  = Files.readAllBytes(blob);
+            byte[] data = removeHeader(raw);
+
+            Files.createDirectories(abs.getParent());
+            Files.write(abs, data);
+        }
+}
 }
